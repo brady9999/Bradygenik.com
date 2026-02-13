@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Under Construction</title>
+
+<style>
+/* root */
+:root {
+  --bg: #0d111a;
+  --card: #16202e;
+  --hovercard: #202e42;
+  --text: #e6f0ff;
+  --muted: #9bb3cc;
+  --azb: #4da6ff;
+  --azb-2: #1a8cff;
+  --border: #233041;
+  --font-accent: 'Courier New', monospace;
+  --contact-radius: 10px;
+  --message: 10px;
+  --text-contact: #ffffff;
+  --margin-contact: 10px;
+}
+
+/* body */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* floating card */
+.card {
+  background: var(--card);
+  padding: 40px 50px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  text-align: center;
+  max-width: 480px;
+  animation: float 4s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(77, 166, 255, 0.15);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* bouncing emoji */
+.emoji {
+  font-size: 3rem;
+  animation: bounce 1.2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* typewriter text */
+.typewriter {
+  font-family: var(--font-accent);
+  color: var(--muted);
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--azb);
+  width: 0;
+  margin: 20px auto;
+  animation: typing 3s steps(40, end) forwards, blink 0.7s infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  0% { border-color: var(--azb); }
+  50% { border-color: transparent; }
+  100% { border-color: var(--azb); }
+}
+
+/* loading bar */
+.loader {
+  margin: 25px auto 15px;
+  width: 80%;
+  height: 10px;
+  background: var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.loader-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--azb);
+  animation: load 4s infinite;
+}
+
+@keyframes load {
+  0% { width: 0%; }
+  50% { width: 100%; }
+  100% { width: 0%; }
+}
+
+/* back button */
+.back-btn {
+  display: inline-block;
+  padding: 12px 22px;
+  background: var(--azb);
+  color: var(--text-contact);
+  border-radius: var(--contact-radius);
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.25s ease;
+}
+
+.contact-btn:hover {
+  background: var(--azb-2);
+}
+</style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="emoji">🚧</div>
+
+    <h1 style="color: var(--azb); font-family: var(--font-accent);">
+      Under Construction
+    </h1>
+
+    <div class="typewriter">
+      Building something cool... please stand by.
+    </div>
+
+    <div class="loader">
+      <div class="loader-fill"></div>
+    </div>
+
+    <a href="/Pages/projects.html" class="back-btn">
+      Back
+    </a>
+  </div>
+</body>
+</html>
