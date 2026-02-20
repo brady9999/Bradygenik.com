@@ -1,5 +1,5 @@
-   const wrapper = document.querySelector('.skill-galaxy-wrapper');
-    const galaxy = document.getElementById('skill-galaxy');
+  const wrapper = document.querySelector('.skill-galaxy-wrapper');
+  const galaxy = document.getElementById('skill-galaxy');
 
     let scale = 1.2;      // starting zoom
     let maxScale = 3.0;   // max zoom allowed
@@ -29,6 +29,29 @@
         if (!isDragging) return;
         const dx = e.pageX - startX;
         const dy = e.pageY - startY;
+        wrapper.scrollLeft = scrollLeft - dx;
+        wrapper.scrollTop = scrollTop - dy;
+    });
+
+    // Touch to pan (mobile)
+    wrapper.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        startX = touch.pageX;
+        startY = touch.pageY;
+        scrollLeft = wrapper.scrollLeft;
+        scrollTop = wrapper.scrollTop;
+    });
+
+    wrapper.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    wrapper.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const dx = touch.pageX - startX;
+        const dy = touch.pageY - startY;
         wrapper.scrollLeft = scrollLeft - dx;
         wrapper.scrollTop = scrollTop - dy;
     });
@@ -112,6 +135,7 @@
             });
         });
     }
+
 
     window.addEventListener("load", drawSubNodeLines);
     window.addEventListener("resize", drawSubNodeLines);

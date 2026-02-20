@@ -86,6 +86,136 @@ nav a:hover {
   color: var(--azb);
 }
 
+.hamburger {
+  display: none;
+}
+
+
+@media (max-width: 800px) {
+
+  /* Hide the desktop nav menu */
+  .nav-center ul {
+    display: none;
+  }
+
+  /* Keep icons visible */
+  .nav-icons {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+  }
+
+  /* Hamburger button */
+  .hamburger {
+    display: block;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    cursor: pointer;
+    color: var(--text);
+    z-index: 10000;
+  }
+
+  header {
+  background: var(--bg);
+  padding: 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  font-family: var(--font-accent);
+}
+
+.nav-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#Logo {
+  width: 75px;
+  height: 75px;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: var(--azb);
+}
+
+.nav-icons {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-icons a {
+  color: var(--text);
+  font-size: 22px;
+  transition: color 0.3s ease;
+}
+
+.nav-icons a:hover {
+  color: var(--azb);
+}
+
+/* FULL SCREEN MOBILE MENU (HIDDEN BY DEFAULT) */
+.mobile-menu {
+  display: none;               /* stays hidden until JS toggles it */
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: var(--hovercard);
+  backdrop-filter: blur(6px);
+
+  z-index: 9998;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.mobile-menu a {
+  font-size: 28px;
+  color: var(--text);
+  text-decoration: none;
+}
+}
+
 /* index page*/
 .hero {
   display: grid;
@@ -231,6 +361,21 @@ nav a:hover {
   color: var(--text);
   padding-left: 10px;
 }
+
+  @media (max-width: 800px) {
+    .project-table {
+        max-width: 100%;
+        background: var(--card);
+        border-radius: 2px;
+        margin: 30px;
+        padding: 20px;
+        font-family: var(--font-accent);
+        display: grid;
+        gap: 10px;
+        border: 10px solid var(--border);
+    }
+
+  }
 
 
 /* Individual Project Page*/
@@ -413,6 +558,75 @@ footer {
   border-radius: var(--contact-radius);
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+@media (max-width: 800px) {
+  .contact-form{
+    text-align: left;
+    margin: 40px 30px 0px 40px;
+    font-family: var(--font-accent);
+    border-top-left-radius: var(--contact-radius);
+  }
+
+  .label{
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  .form-row{
+    margin-bottom: 16px;
+  }
+
+  .error{
+    color: red;
+  }
+
+  .en{
+    color: var(--text-contact);
+    width: 100%;
+    height: 30px;
+    resize: none;
+    margin-bottom: var(--margin-contact);
+    border-radius: var(--contact-radius);
+    background-color: var(--card);
+    border-style: solid;
+    border-color: var(--border);
+  }
+
+  .subject{
+    color: var(--text-contact);
+    width: 100%;
+    height: 30px;
+    resize: none;
+    margin-bottom: var(--margin-contact);
+    border-radius: var(--contact-radius);
+    background-color: var(--card);
+    border-style: solid;
+    border-color: var(--border);
+  }
+
+  .message{
+    color: var(--text-contact);
+    width: 100%;
+    height: 120px;
+    resize: none;
+    margin-bottom: var(--margin-contact);
+    border-radius: var(--message);
+    background-color: var(--card);
+    border-style: solid;
+    border-color: var(--border);
+  }
+
+  .btn_primary{
+    color: var(--text-contact);
+    background-color: var(--azb);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--contact-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
 }
 
 /* skills page*/
