@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>brady@genik:~$</title>
+<link rel="icon" href="/Images/Logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #0A0A0A;
+  --bg2:        #0F0F0F;
+  --border:     #1f1f1f;
+  --green:      #39FF14;
+  --green-dim:  #1a6b08;
+  --green-glow: rgba(57,255,20,0.12);
+  --amber:      #FFB000;
+  --red:        #FF4444;
+  --blue:       #4DA6FF;
+  --cyan:       #00E5FF;
+  --white:      #DEDEDE;
+  --muted:      #4a4a4a;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  cursor: none;
+}
+
+/* scanlines */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none; z-index: 9000;
+}
+
+/* CRT vignette */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);
+  pointer-events: none; z-index: 8999;
+}
+
+/* CURSOR */
+.cursor {
+  position: fixed;
+  width: 2px; height: 16px;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  pointer-events: none; z-index: 9999;
+  transform: translate(-1px, -8px);
+  animation: cblink 1s step-end infinite;
+}
+@keyframes cblink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+/* ── BOOT SCREEN ─────────────────────── */
+#boot {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  padding: 32px 40px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+.bl { display: block; opacity: 0; white-space: pre; font-size: 13px; line-height: 1.75; }
+.bl.v  { opacity: 1; }
+.c-g   { color: var(--green); }
+.c-a   { color: var(--amber); }
+.c-r   { color: var(--red); }
+.c-b   { color: var(--blue); }
+.c-c   { color: var(--cyan); }
+.c-w   { color: var(--white); }
+.c-m   { color: var(--muted); }
+
+.boot-progress { display: flex; align-items: center; gap: 12px; opacity: 0; margin-top: 2px; }
+.boot-progress.v { opacity: 1; }
+.bp-bar { width: 260px; height: 5px; background: var(--border); }
+.bp-fill { height: 100%; background: var(--green); box-shadow: 0 0 10px var(--green); width: 0%; transition: width 1.5s ease; }
+.bp-pct { color: var(--green); font-size: 12px; min-width: 36px; }
+
+/* ── TERMINAL ────────────────────────── */
+#terminal {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+}
+
+/* title bar */
+.titlebar {
+  flex-shrink: 0;
+  height: 34px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+}
+.tb-dots { display: flex; gap: 7px; }
+.tb-dot { width: 12px; height: 12px; border-radius: 50%; }
+.tb-dot.r { background: #FF5F57; }
+.tb-dot.y { background: #FEBC2E; }
+.tb-dot.g { background: #28C840; }
+.tb-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+.tb-title b { color: var(--green); }
+.tb-right { display: flex; align-items: center; gap: 16px; }
+.tb-clock { font-size: 11px; color: var(--muted); }
+.tb-hint  { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+.tb-hint a { color: var(--cyan); text-decoration: none; }
+.tb-hint a:hover { color: var(--green); }
+
+/* output area */
+.output-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 40px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.output-area::-webkit-scrollbar { width: 6px; }
+.output-area::-webkit-scrollbar-track { background: transparent; }
+.output-area::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* input bar */
+.input-bar {
+  flex-shrink: 0;
+  padding: 8px 40px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+.input-bar input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--green); font-family: var(--mono); font-size: 13px;
+  caret-color: var(--green);
+}
+
+/* ── TERMINAL CONTENT STYLES ─────────── */
+.ascii {
+  color: var(--green);
+  font-size: clamp(5.5px, 0.85vw, 9.5px);
+  line-height: 1.12;
+  white-space: pre;
+  text-shadow: 0 0 14px var(--green-dim);
+  margin-bottom: 18px;
+}
+
+.ps1 { color: var(--green); }
+.ps1 .u { color: var(--cyan); }
+.ps1 .at { color: var(--muted); }
+.ps1 .h  { color: var(--amber); }
+.ps1 .p  { color: var(--blue); }
+.ps1 .dl { color: var(--white); }
+
+.line { display: flex; gap: 0; align-items: flex-start; margin-bottom: 0; }
+.out  { color: var(--white); padding: 0; }
+
+/* coloring helpers */
+.g  { color: var(--green); }
+.a  { color: var(--amber); }
+.r  { color: var(--red); }
+.b  { color: var(--blue); }
+.c  { color: var(--cyan); }
+.m  { color: var(--muted); }
+.w  { color: var(--white); }
+.dim { color: var(--green-dim); }
+.bold { font-weight: 700; }
+.it { font-style: italic; }
+.ul { text-decoration: underline; }
+.lk { color: var(--blue); cursor: none; }
+.lk:hover { color: var(--cyan); }
+
+.block { margin-bottom: 16px; }
+.block .cmd-line { margin-bottom: 4px; }
+.block .response { padding: 0 0 0 0; }
+.block .response > div { line-height: 1.85; }
+
+.divider { color: var(--muted); margin: 8px 0; user-select: none; }
+
+.blink-cursor {
+  display: inline-block;
+  width: 8px; height: 1em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: cblink 1s step-end infinite;
+}
+
+/* mobile */
+@media (max-width: 640px) {
+  .output-area { padding: 16px 20px 8px; }
+  .input-bar { padding: 8px 20px 12px; }
+  .ascii { font-size: 4px; }
+  .boot { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- ══════════ BOOT ══════════ -->
+<div id="boot">
+  <span class="bl c-g" id="L0">GENIK-OS  v2.6  |  copyright (c) Brady Genik  |  Winnipeg, MB</span>
+  <span class="bl c-m" id="L1"> </span>
+  <span class="bl c-w" id="L2">[ BIOS ]  detecting hardware...</span>
+  <span class="bl c-g" id="L3">[ OK   ]  cpu:        Brady_Genik_v1 @ sustained_effort</span>
+  <span class="bl c-g" id="L4">[ OK   ]  memory:     caffeine.img  (4 shots loaded)</span>
+  <span class="bl c-g" id="L5">[ OK   ]  storage:    /projects  /skills  /experience  /contact  mounted</span>
+  <span class="bl c-a" id="L6">[ WARN ]  sleep_schedule.ko  — module not found, ignoring</span>
+  <span class="bl c-m" id="L7"> </span>
+  <span class="bl c-w" id="L8">[ BOOT ]  loading kernel modules...</span>
+  <span class="bl c-g" id="L9">[ OK   ]  networking.ko      (CCNA · Cisco IOS · VLANs · routing · subnetting)</span>
+  <span class="bl c-g" id="L10">[ OK   ]  security.ko        (CompTIA Security+ · Azure · zero trust · IAM)</span>
+  <span class="bl c-g" id="L11">[ OK   ]  sysadmin.ko        (Linux · Windows Server · Active Directory · PowerShell)</span>
+  <span class="bl c-g" id="L12">[ OK   ]  devtools.ko        (Python · Flask · HTML · CSS · JavaScript)</span>
+  <span class="bl c-g" id="L13">[ OK   ]  cloud.ko           (Azure · Cloud Network Technician cert)</span>
+  <span class="bl c-a" id="L14">[ WARN ]  social_life.ko     — dependency conflict, skipping</span>
+  <span class="bl c-m" id="L15"> </span>
+  <span class="bl c-w" id="L16">[ INIT ]  starting services...</span>
+  <span class="bl c-g" id="L17">[ OK   ]  intern.service     (City of Winnipeg — Tech &amp; Innovation  ●  ACTIVE)</span>
+  <span class="bl c-g" id="L18">[ OK   ]  student.service    (MITT — Network Systems Administrator    ●  ACTIVE)</span>
+  <span class="bl c-g" id="L19">[ OK   ]  projects.service   (Apollo · Athena · Hermes · Hephaestus · ...)</span>
+  <span class="bl c-g" id="L20">[ OK   ]  portfolio.service  (bradygenik.com                          ●  ACTIVE)</span>
+  <span class="bl c-m" id="L21"> </span>
+  <span class="bl c-c" id="L22">[ LOAD ]  rendering terminal interface...</span>
+  <div class="boot-progress" id="Lbar">
+    <span class="c-g" style="font-size:13px">[ PROG ] </span>
+    <div class="bp-bar"><div class="bp-fill" id="bfill"></div></div>
+    <span class="bp-pct" id="bpct">0%</span>
+  </div>
+  <span class="bl c-m" id="L23"> </span>
+  <span class="bl c-g" id="L24">[ DONE ]  system ready.  type <span style="color:var(--cyan)">help</span> to get started.</span>
+</div>
+
+<!-- ══════════ TERMINAL ══════════ -->
+<div id="terminal">
+
+  <div class="titlebar">
+    <div class="tb-dots">
+      <div class="tb-dot r"></div>
+      <div class="tb-dot y"></div>
+      <div class="tb-dot g"></div>
+    </div>
+    <div class="tb-title"><b>brady</b>@<b>genik</b>:~$ — portfolio</div>
+    <div class="tb-right">
+      <span class="tb-hint">want to browse? → <a href="/Pages/portfolio.html">./portfolio</a></span>
+      <span class="tb-clock" id="clock">--:--:--</span>
+    </div>
+  </div>
+
+  <div class="output-area" id="output">
+
+    <pre class="ascii">
+ ██████╗ ██████╗  █████╗ ██████╗ ██╗   ██╗     ██████╗ ███████╗███╗   ██╗██╗██╗  ██╗
+ ██╔══██╗██╔══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔════╝████╗  ██║██║██║ ██╔╝ 
+ ██████╔╝██████╔╝███████║██║  ██║ ╚████╔╝     ██║  ███╗█████╗  ██╔██╗ ██║██║█████╔╝  
+ ██╔══██╗██╔══██╗██╔══██║██║  ██║  ╚██╔╝      ██║   ██║██╔══╝  ██║╚██╗██║██║██╔═██╗  
+ ██████╔╝██║  ██║██║  ██║██████╔╝   ██║       ╚██████╔╝███████╗██║ ╚████║██║██║  ██╗ 
+ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝   ╚═╝        ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝</pre>
+
+    <div class="block">
+      <div class="cmd-line line">
+        <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="h">genik</span><span class="p">:~</span><span class="dl">$ </span></span>
+        <span class="out">whoami</span>
+      </div>
+      <div class="response">
+        <div><span class="g bold">brady_genik</span> — NSA student @ MITT · Intern @ City of Winnipeg Tech &amp; Innovation</div>
+        <div class="m it"># Builder. Network nerd. Can't stop starting projects.</div>
+        <div class="m it"># Placeholder — one line that sounds like you, not a resume.</div>
+      </div>
+    </div>
+
+    <div class="divider">────────────────────────────────────────────────────────────────────</div>
+
+    <div class="block">
+      <div class="cmd-line line">
+        <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="h">genik</span><span class="p">:~</span><span class="dl">$ </span></span>
+        <span class="out">help</span>
+      </div>
+      <div class="response">
+        <div class="m">available commands:</div>
+        <div>&nbsp;</div>
+        <div>&nbsp; <span class="c">whoami</span>      <span class="m">——</span>  who is this guy</div>
+        <div>&nbsp; <span class="c">about</span>       <span class="m">——</span>  more detail on me</div>
+        <div>&nbsp; <span class="c">projects</span>    <span class="m">——</span>  list all projects</div>
+        <div>&nbsp; <span class="c">skills</span>      <span class="m">——</span>  technical stack &amp; certs</div>
+        <div>&nbsp; <span class="c">experience</span>  <span class="m">——</span>  work history</div>
+        <div>&nbsp; <span class="c">contact</span>     <span class="m">——</span>  get in touch</div>
+        <div>&nbsp; <span class="c">social</span>      <span class="m">——</span>  links</div>
+        <div>&nbsp; <span class="c">ls</span>          <span class="m">——</span>  list directory</div>
+        <div>&nbsp; <span class="c">portfolio</span>   <span class="m">——</span>  open full portfolio page</div>
+        <div>&nbsp; <span class="c">clear</span>       <span class="m">——</span>  clear terminal</div>
+        <div>&nbsp;</div>
+        <div class="m it"># tab to autocomplete  ·  ↑↓ for command history</div>
+      </div>
+    </div>
+
+    <div class="divider">────────────────────────────────────────────────────────────────────</div>
+
+    <!-- live history injected here -->
+    <div id="history"></div>
+
+  </div>
+
+  <div class="input-bar">
+    <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="h">genik</span><span class="p">:~</span><span class="dl">$ </span></span>
+    <input type="text" id="inp" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+  </div>
+
+</div>
+
+<script>
+/* cursor */
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+});
+
+/* clock */
+const clockEl = document.getElementById('clock');
+setInterval(() => { clockEl.textContent = new Date().toTimeString().slice(0,8); }, 1000);
+
+/* ── BOOT ──────────────────────────── */
+const lines = ['L0','L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L20','L21','L22'];
+const times = [0,70,160,260,350,440,530,610,700,810,900,990,1080,1170,1260,1330,1430,1560,1660,1750,1840,1920,2060];
+
+lines.forEach((id,i) => setTimeout(() => {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('v');
+}, times[i]));
+
+setTimeout(() => {
+  const bar = document.getElementById('Lbar');
+  const fill = document.getElementById('bfill');
+  const pct  = document.getElementById('bpct');
+  bar.classList.add('v');
+  let p = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 7 + 3;
+    if (p >= 100) { p = 100; clearInterval(iv); }
+    fill.style.width = p + '%';
+    pct.textContent  = Math.floor(p) + '%';
+  }, 55);
+}, 2100);
+
+setTimeout(() => {
+  const el23 = document.getElementById('L23'); if(el23) el23.classList.add('v');
+  const el24 = document.getElementById('L24'); if(el24) el24.classList.add('v');
+}, 3800);
+
+setTimeout(() => {
+  const boot = document.getElementById('boot');
+  boot.style.transition = 'opacity 0.45s';
+  boot.style.opacity = '0';
+  setTimeout(() => {
+    boot.style.display = 'none';
+    const term = document.getElementById('terminal');
+    term.style.display = 'flex';
+    document.getElementById('inp').focus();
+  }, 460);
+}, 4300);
+
+/* ── COMMANDS ──────────────────────── */
+const CMDS = {
+  help: () => `<div class="m">available commands:</div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="c">whoami</span>      <span class="m">——</span>  who is this guy</div>
+<div>&nbsp; <span class="c">about</span>       <span class="m">——</span>  more detail on me</div>
+<div>&nbsp; <span class="c">projects</span>    <span class="m">——</span>  list all projects</div>
+<div>&nbsp; <span class="c">skills</span>      <span class="m">——</span>  technical stack &amp; certs</div>
+<div>&nbsp; <span class="c">experience</span>  <span class="m">——</span>  work history</div>
+<div>&nbsp; <span class="c">contact</span>     <span class="m">——</span>  get in touch</div>
+<div>&nbsp; <span class="c">social</span>      <span class="m">——</span>  links</div>
+<div>&nbsp; <span class="c">ls</span>          <span class="m">——</span>  list directory</div>
+<div>&nbsp; <span class="c">portfolio</span>   <span class="m">——</span>  open full portfolio page</div>
+<div>&nbsp; <span class="c">clear</span>       <span class="m">——</span>  clear terminal</div>
+<div>&nbsp;</div>
+<div class="m it"># tab to autocomplete  ·  ↑↓ for history</div>`,
+
+  whoami: () => `<div><span class="g bold">brady_genik</span> — NSA student @ MITT · Intern @ City of Winnipeg</div>
+<div class="m it"># Builder. Network nerd. Can't stop starting projects.</div>
+<div class="m it"># Placeholder — one real line that sounds like you.</div>`,
+
+  about: () => `<div class="c">name</div><div class="m">———————————————————————</div>
+<div>&nbsp; <span class="m">name       =</span> <span class="a">"Brady Genik"</span></div>
+<div>&nbsp; <span class="m">location   =</span> <span class="a">"Winnipeg, MB, Canada"</span></div>
+<div>&nbsp; <span class="m">program    =</span> <span class="a">"Network Systems Admin @ MITT (2023–2026)"</span></div>
+<div>&nbsp; <span class="m">intern     =</span> <span class="a">"City of Winnipeg — Tech &amp; Innovation"</span></div>
+<div>&nbsp; <span class="m">status     =</span> <span class="g bold">ACTIVE</span></div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="m">bio        =</span> <span class="w">"""</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="w">I got into tech through PTEC (Pembina Trails Early College)</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="w">learning networking + multiple languages before most people</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="w">knew what a subnet mask was.</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="w">Placeholder — something personal and real here.</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="w">Placeholder — what's outside of tech for you?</span></div>
+<div>&nbsp; <span class="w">"""</span></div>
+<div>&nbsp;</div>
+<div class="m it"># run <span class="c">portfolio</span> to see the full visual page</div>`,
+
+  projects: () => `<div class="m">// ~/projects — 6 entries</div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="m">01</span>  <span class="g bold">Apollo</span>          <span class="b">[in_progress]</span>  <span class="m">AI music tool — a musician's best friend</span></div>
+<div>&nbsp; <span class="m">02</span>  <span class="g">Wrangler Dash</span>   <span class="g">[done]</span>         <span class="m">Modular error/warning dashboard</span></div>
+<div>&nbsp; <span class="m">03</span>  <span class="g">Athena</span>          <span class="a">[paused]</span>       <span class="m">Brutally honest AI assistant</span></div>
+<div>&nbsp; <span class="m">04</span>  <span class="g">Hermes</span>          <span class="b">[in_progress]</span>  <span class="m">Note-taking app</span></div>
+<div>&nbsp; <span class="m">05</span>  <span class="g">Hephaestus</span>      <span class="g">[done]</span>         <span class="m">Browser art studio</span></div>
+<div>&nbsp; <span class="m">06</span>  <span class="m">placeholder</span>     <span class="b">[in_progress]</span>  <span class="m">placeholder</span></div>
+<div>&nbsp;</div>
+<div class="m it"># run <span class="c">open &lt;name&gt;</span> to jump to a project  ·  or <span class="c">portfolio</span> for full visual</div>`,
+
+  skills: () => `<div class="m">// kernel modules loaded:</div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="c">networking</span>   <span class="m">·</span>  <span class="w">CCNA · Cisco IOS · VLANs · routing · subnetting · firewalls</span></div>
+<div>&nbsp; <span class="c">security</span>     <span class="m">·</span>  <span class="w">CompTIA Security+ · Azure · zero trust · IAM · threat analysis</span></div>
+<div>&nbsp; <span class="c">sysadmin</span>     <span class="m">·</span>  <span class="w">Linux · Windows Server · Active Directory · PowerShell · bash</span></div>
+<div>&nbsp; <span class="c">cloud</span>        <span class="m">·</span>  <span class="w">Azure · Cloud Network Technician cert</span></div>
+<div>&nbsp; <span class="c">dev</span>          <span class="m">·</span>  <span class="w">Python · Flask · HTML · CSS · JavaScript · REST APIs</span></div>
+<div>&nbsp; <span class="c">hardware</span>     <span class="m">·</span>  <span class="w">enterprise APs · managed switches · routers · rack infra</span></div>
+<div>&nbsp; <span class="c">placeholder</span>  <span class="m">·</span>  <span class="m">placeholder skill</span></div>
+<div>&nbsp;</div>
+<div class="m">// certs:</div>
+<div>&nbsp; <span class="a">✓</span> <span class="w">Cloud Network Technician</span></div>
+<div>&nbsp; <span class="a">✓</span> <span class="w">Placeholder cert</span></div>
+<div>&nbsp; <span class="b">○</span> <span class="m">CCNA (in progress)</span></div>
+<div>&nbsp; <span class="b">○</span> <span class="m">CompTIA Security+ (in progress)</span></div>`,
+
+  experience: () => `<div class="m">// work history</div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="a">Jan 2026 — Apr 2026</span>  <span class="g bold">Tech &amp; Innovation Intern</span>  <span class="m">@ City of Winnipeg</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="m">WIL placement. Enterprise automation, physical networking infra, city-scale IT.</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="m">Placeholder — coolest thing you've worked on here?</span></div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="a">2023 — 2026</span>          <span class="g bold">NSA Student</span>              <span class="m">@ MITT</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="m">Cloud Network Technician cert by grade 12. Now: CCNA, Security+, Server+, Azure, Linux.</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="m">Hands-on with physical switches, APs, routers weekly. Placeholder — best MITT moment?</span></div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="a">2022 — present</span>       <span class="g bold">Cook · Driver · Cashier · Tech Support</span>  <span class="m">@ Gondola Pizza</span></div>
+<div>&nbsp;&nbsp;&nbsp; <span class="m">Ultimate all-in-one employee since grade 10. Placeholder — actual tech support or a joke?</span></div>`,
+
+  contact: () => `<div class="m">// reach me</div>
+<div>&nbsp;</div>
+<div>&nbsp; <span class="c">github</span>     <span class="m">→</span>  <a href="https://github.com/brady9999" target="_blank" class="lk">github.com/brady9999</a></div>
+<div>&nbsp; <span class="c">linkedin</span>   <span class="m">→</span>  <a href="https://linkedin.com/in/bradygenik" target="_blank" class="lk">linkedin.com/in/bradygenik</a></div>
+<div>&nbsp; <span class="c">instagram</span>  <span class="m">→</span>  <a href="https://instagram.com/brady_genik2" target="_blank" class="lk">instagram.com/brady_genik2</a></div>
+<div>&nbsp; <span class="c">form</span>       <span class="m">→</span>  <a href="/Pages/contact.html" class="lk">bradygenik.com/contact</a></div>
+<div>&nbsp;</div>
+<div class="g">✓  always open to opportunities, collabs, or just talking tech</div>
+<div class="m it"># placeholder — what kind of opportunities are you actually looking for?</div>`,
+
+  social: () => `<div>&nbsp; <span class="c">github</span>     <span class="m">→</span>  <a href="https://github.com/brady9999" target="_blank" class="lk">github.com/brady9999</a></div>
+<div>&nbsp; <span class="c">linkedin</span>   <span class="m">→</span>  <a href="https://linkedin.com/in/bradygenik" target="_blank" class="lk">linkedin.com/in/bradygenik</a></div>
+<div>&nbsp; <span class="c">instagram</span>  <span class="m">→</span>  <a href="https://instagram.com/brady_genik2" target="_blank" class="lk">instagram.com/brady_genik2</a></div>`,
+
+  ls: () => `<div><span class="b">drwxr-xr-x</span>  <span class="g">projects/</span>    <span class="m">— 6 items</span></div>
+<div><span class="b">drwxr-xr-x</span>  <span class="g">skills/</span>      <span class="m">— 7 modules</span></div>
+<div><span class="b">drwxr-xr-x</span>  <span class="g">experience/</span>  <span class="m">— 3 entries</span></div>
+<div><span class="b">-rw-r--r--</span>  <span class="a">brady_genik.conf</span></div>
+<div><span class="b">-rw-r--r--</span>  <span class="a">resume.pdf</span>   <span class="m">— placeholder</span></div>
+<div><span class="b">lrwxrwxrwx</span>  <span class="c">portfolio</span>    <span class="m">→  /Pages/portfolio.html</span></div>`,
+
+  pwd: () => `<span class="g">/home/brady/portfolio</span>`,
+  date: () => `<span class="g">${new Date().toString()}</span>`,
+  uname: () => `<span class="g">GENIK-OS 2.6.0 brady-portfolio #1 SMP JetBrains-Mono amd64</span>`,
+  uptime: () => {
+    const s = Math.floor((Date.now() - pageLoad) / 1000);
+    const m = Math.floor(s/60), h = Math.floor(m/60);
+    return `<span class="g">up ${h > 0 ? h+'h ' : ''}${m%60}m ${s%60}s</span>  <span class="m">load avg: high, high, high</span>`;
+  },
+  sudo: () => `<span class="a">[sudo] password for brady: </span>
+<span class="r">brady is not in the sudoers file.</span>
+<span class="m it"># this incident will be reported. (jk it's a portfolio site)</span>`,
+  vim: () => `<span class="m it"># who opens vim in a portfolio site? legend.</span>
+<span class="m"># (type :q! to quit)</span>`,
+  ':q!': () => `<span class="g">saved and closed.</span>`,
+  cat: (a) => a.length ? `<span class="r">cat: ${esc(a.join(' '))}: no such file or directory</span><div class="m it"># try <span class="c">ls</span> to see what's here</div>` : `<span class="r">cat: missing operand</span>`,
+  portfolio: () => { setTimeout(() => window.location.href = '/Pages/portfolio.html', 400); return `<span class="g">✓ opening portfolio page...</span>`; },
+  open: (a) => {
+    const map = { apollo:'/Pages/Projects/Apollo.html', 'wrangler-dash':'/Pages/Projects/WranglerDash.html', athena:'https://athena.bradygenik.com/', hermes:'/Pages/Under_Construction.html', hephaestus:'/Pages/Projects/Hephaestus.html' };
+    const key = a[0]?.toLowerCase().replace(/\s/g,'-');
+    if (map[key]) { setTimeout(() => window.open(map[key],'_blank'), 400); return `<span class="g">✓ opening ${esc(a[0])}...</span>`; }
+    return `<span class="r">open: project not found: ${esc(a.join(' '))}</span><div class="m it"># run <span class="c">projects</span> to see valid names</div>`;
+  },
+  clear: () => { document.getElementById('history').innerHTML = ''; return null; },
+  exit: () => `<span class="m it"># nice try. you can't leave.</span>`,
+  reboot: () => { setTimeout(() => location.reload(), 600); return `<span class="a">rebooting...</span>`; },
+};
+
+const pageLoad = Date.now();
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+const inp = document.getElementById('inp');
+const hist = document.getElementById('history');
+const output = document.getElementById('output');
+let cmdHist = [], histIdx = -1;
+
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const raw = inp.value.trim();
+    inp.value = ''; histIdx = -1;
+    if (!raw) return;
+    cmdHist.unshift(raw);
+    const parts = raw.split(' ');
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1);
+
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = `<div class="cmd-line line"><span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="h">genik</span><span class="p">:~</span><span class="dl">$ </span></span><span class="out">${esc(raw)}</span></div>`;
+
+    const fn = CMDS[cmd];
+    const out = fn ? fn(args) : `<span class="r">command not found: ${esc(cmd)}</span>  <span class="m it"># try '<span class="c">help</span>'</span>`;
+
+    if (out !== null) {
+      const r = document.createElement('div');
+      r.className = 'response';
+      r.innerHTML = out;
+      block.appendChild(r);
+    }
+
+    hist.appendChild(block);
+    output.scrollTop = output.scrollHeight;
+  }
+  if (e.key === 'ArrowUp') { e.preventDefault(); if(histIdx < cmdHist.length-1) histIdx++; inp.value = cmdHist[histIdx]||''; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); if(histIdx>0) histIdx--; else{histIdx=-1;inp.value='';return;} inp.value=cmdHist[histIdx]||''; }
+  if (e.key === 'Tab') { e.preventDefault(); const p=inp.value.toLowerCase(); const m=Object.keys(CMDS).find(k=>k.startsWith(p)); if(m) inp.value=m; }
+});
+
+document.getElementById('output').addEventListener('click', () => inp.focus());
+</script>
+</body>
+</html>

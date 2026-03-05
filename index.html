@@ -1,78 +1,764 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>Brady Genik</title>
-    <link rel="icon" href="/Images/Logo.png" type="image/png">
-    <link rel="stylesheet" href="/CSS/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brady Genik Terminal</title>
+<link rel="icon" href="/Images/Logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* ═══════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════ */
+:root {
+  --bg:        #0C0C0C;
+  --bg2:       #111111;
+  --bg3:       #161616;
+  --border:    #2a2a2a;
+  --green:     #39FF14;
+  --green-dim: #1a7a09;
+  --green-glow:rgba(57,255,20,0.15);
+  --amber:     #FFB000;
+  --red:       #FF4444;
+  --blue:      #4DA6FF;
+  --cyan:      #00FFFF;
+  --white:     #E8E8E8;
+  --muted:     #555555;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--mono);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* scanlines */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9000;
+}
+
+/* CRT vignette */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+
+  pointer-events: none;
+  z-index: 8999;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ═══════════════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════════════ */
+.cursor {
+  position: fixed;
+  width: 2px; height: 18px;
+  background: var(--green);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px var(--green);
+  animation: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+/* ═══════════════════════════════════════
+   BOOT SCREEN
+═══════════════════════════════════════ */
+#boot-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow: hidden;
+}
+
+.boot-line {
+  opacity: 0;
+  white-space: pre;
+}
+.boot-line.show { opacity: 1; }
+.boot-line.green { color: var(--green); }
+.boot-line.amber { color: var(--amber); }
+.boot-line.red   { color: var(--red); }
+.boot-line.cyan  { color: var(--cyan); }
+.boot-line.white { color: var(--white); }
+.boot-line.muted { color: var(--muted); }
+
+.boot-bar-wrap {
+  display: flex; align-items: center; gap: 12px;
+  opacity: 0;
+}
+.boot-bar-wrap.show { opacity: 1; }
+.boot-bar {
+  height: 6px; width: 280px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.boot-bar-fill {
+  height: 100%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  width: 0%;
+  transition: width 1.4s ease;
+}
+
+/* ═══════════════════════════════════════
+   MAIN — hidden until boot done
+═══════════════════════════════════════ */
+#main { display: none; }
+
+/* ═══════════════════════════════════════
+   TOP BAR  (like a terminal title bar)
+═══════════════════════════════════════ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 36px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 200;
+  font-size: 11px;
+}
+
+.topbar-left {
+  display: flex; align-items: center; gap: 20px;
+}
+
+.tb-dots { display: flex; gap: 6px; }
+.tb-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.tb-dot.close  { background: #FF5F57; }
+.tb-dot.min    { background: #FEBC2E; }
+.tb-dot.expand { background: #28C840; }
+
+.tb-title {
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+.tb-title span {
+   color: var(--green); 
+  }
+
+.topbar-right {
+  display: flex; align-items: center; gap: 24px;
+  color: var(--muted);
+}
+
+.topbar-center {
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+
+.topbar-nav { display: flex; gap: 20px; }
+.topbar-nav a {
+  font-size: 11px; letter-spacing: 0.08em;
+  color: var(--muted); transition: color 0.2s;
+}
+.topbar-nav a:hover { color: var(--green); }
+
+.tb-time { color: var(--muted); font-size: 11px; }
+
+/* ═══════════════════════════════════════
+   TERMINAL HERO  (interactive shell)
+═══════════════════════════════════════ */
+.terminal-hero {
+  height: 100vh;
+  padding-top: 36px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.term-window {
+  flex: 1;
+  padding: 28px 40px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 36px);
+  overflow: hidden;
+}
+
+/* ASCII art header */
+.ascii-art {
+  color: var(--green);
+  font-size: clamp(7px, 1.1vw, 12px);
+  line-height: 1.15;
+  margin-bottom: 24px;
+  white-space: pre;
+  text-shadow: 0 0 10px var(--green-dim);
+  opacity: 0;
+  animation: fadeIn 0.4s 0.2s forwards;
+}
+
+.term-intro {
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeIn 0.4s 0.5s forwards;
+}
+
+.prompt-line {
+  display: flex; align-items: flex-start; gap: 0;
+  line-height: 1.7;
+  flex-wrap: wrap;
+}
+
+.ps1 { color: var(--green); white-space: nowrap; }
+.ps1 .u { color: var(--cyan); }
+.ps1 .at { color: var(--muted); }
+.ps1 .host { color: var(--amber); }
+.ps1 .path { color: var(--blue); }
+.ps1 .dollar { color: var(--white); }
+
+.output { color: var(--white); padding-left: 0; line-height: 1.8; font-size: 13px; }
+.output .key { color: var(--cyan); }
+.output .val { color: var(--white); }
+.output .comment { color: var(--muted); }
+.output .success { color: var(--green); }
+.output .warn { color: var(--amber); }
+.output .err { color: var(--red); }
+.output .link { color: var(--blue); text-decoration: underline; cursor: none; }
+
+.term-divider { color: var(--muted); margin: 4px 0; font-size: 13px; }
+
+/* Input line */
+.input-row {
+  display: flex; align-items: center; gap: 0;
+  margin-top: 8px;
+  background: transparent;
+  animation: fadeIn 0.3s 0.8s forwards;
+}
+
+.term-input-wrap {
+  display: flex; align-items: center;
+  flex: 1;
+  position: relative;
+  background: transparent;
+}
+
+#term-input { /*This is the actual input field where you type commands*/  
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 13px;
+  width: 100%;
+  padding: 0;
+  letter-spacing: 0.02em;
+}
+
+/* history output area */
+#history {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.hist-block { margin-bottom: 12px; }
+.hist-cmd { color: var(--green); }
+.hist-out { margin-top: 4px; }
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.footer {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 20px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  font-size: 11px;
+}
+.footer-left { color: var(--muted); }
+.footer-left span { color: var(--green); }
+.footer-socials { display: flex; gap: 20px; }
+.footer-socials a { color: var(--muted); font-size: 15px; transition: color 0.2s; }
+.footer-socials a:hover { color: var(--green); }
+.footer-right { color: var(--muted); }
+
+@media (max-width: 640px) {
+  .footer { padding: 16px 20px; flex-direction: column; text-align: center; }
+}
+
+/* ═══════════════════════════════════════
+   SCROLL REVEALS
+═══════════════════════════════════════ */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+</style>
 </head>
 <body>
-<header>
-  <nav>
-    <div class="nav-left">
-      <a href="index.html">
-        <img src="/Images/Logo.png" alt="Brady Genik Logo" id="Logo">
-      </a>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+
+<!-- ══════════════ BOOT SCREEN ══════════════ -->
+<div id="boot-screen">
+  <div class="boot-line green" id="b0">GENIK-OS v2.6.0  |  Copyright (c) Brady Genik  |  All rights reserved</div>
+  <div class="boot-line muted" id="b1"> </div>
+  <div class="boot-line white" id="b2">[ BIOS ]  Initializing hardware...</div>
+  <div class="boot-line green" id="b3">[ OK   ]  CPU: Brady_Genik_v1  @  max_effort</div>
+  <div class="boot-line green" id="b4">[ OK   ]  Memory: loaded successfully</div>
+  <div class="boot-line green" id="b5">[ OK   ]  Storage: /projects  /skills  /experience  mounted</div>
+  <div class="boot-line amber" id="b6">[ WARN ]  Sleep schedule module not found — continuing anyway</div>
+  <div class="boot-line muted" id="b7"> </div>
+  <div class="boot-line white" id="b8">[ BOOT ]  Loading kernel modules...</div>
+  <div class="boot-line green" id="b9">[ OK   ]  networking.ko  (CCNA, Cisco IOS, VLANs, routing)</div>
+  <div class="boot-line green" id="b10">[ OK   ]  security.ko   (CompTIA Security+, Azure, Zero Trust)</div>
+  <div class="boot-line green" id="b11">[ OK   ]  devtools.ko   (Python, Flask, HTML, CSS, JS)</div>
+  <div class="boot-line green" id="b12">[ OK   ]  linux.ko      (Ubuntu, bash, systemd, Active Directory)</div>
+  <div class="boot-line amber" id="b13">[ WARN ]  sleep_schedule.ko — module timed out, skipping</div>
+  <div class="boot-line muted" id="b14"> </div>
+  <div class="boot-line white" id="b15">[ INIT ]  Starting services...</div>
+  <div class="boot-line green" id="b16">[ OK   ]  intern.service     (City of Winnipeg — Tech &amp; Innovation)</div>
+  <div class="boot-line green" id="b17">[ OK   ]  student.service    (MITT — Network Systems Admin)</div>
+  <div class="boot-line green" id="b18">[ OK   ]  projects.service   (Apollo, Athena, Hermes, Hephaestus...)</div>
+  <div class="boot-line green" id="b19">[ OK   ]  portfolio.service  (bradygenik.com)</div>
+  <div class="boot-line muted" id="b20"> </div>
+  <div class="boot-line cyan"  id="b21">[ LOAD ]  Rendering terminal...</div>
+  <div class="boot-bar-wrap" id="bbar">
+    <span class="green" style="font-size:13px">[ PROG ] </span>
+    <div class="boot-bar"><div class="boot-bar-fill" id="boot-fill"></div></div>
+    <span id="boot-pct" style="color:var(--green);font-size:13px">0%</span>
+  </div>
+  <div class="boot-line muted" id="b22"> </div>
+  <div class="boot-line green" id="b23">[ DONE ]  System ready.  Welcome, visitor.</div>
+</div>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div id="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="tb-dots">
+        <div class="tb-dot close"></div>
+        <div class="tb-dot min"></div>
+        <div class="tb-dot expand"></div>
+      </div>
     </div>
-    <div id="mobile-menu" class="mobile-menu">
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="/Pages/about.html">About</a></li>
-        <li><a href="/Pages/skills.html">Skills</a></li>
-        <li><a href="/Pages/projects.html">Projects</a></li>
-        <li><a href="/Pages/contact.html">Contact</a></li>
-      </ul>
+    <div class="topbar-center">
+      <div class="tb-title"><b>brady</b>@<b>genik</b>:~$ — Terminal</div>
     </div>
-    <div class="nav-icons">
+  </div>
+
+  <!-- TERMINAL HERO -->
+  <section class="terminal-hero" id="terminal">
+    <div class="term-window">
+
+      <!-- history output -->
+      <div id="history">
+        <pre class="ascii-art">
+      ██████╗ ██████╗  █████╗ ██████╗ ██╗   ██╗     ██████╗ ███████╗███╗   ██╗██╗██╗  ██╗
+      ██╔══██╗██╔══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔════╝████╗  ██║██║██║ ██╔╝
+      ██████╔╝██████╔╝███████║██║  ██║ ╚████╔╝     ██║  ███╗█████╗  ██╔██╗ ██║██║█████╔╝ 
+      ██╔══██╗██╔══██╗██╔══██║██║  ██║  ╚██╔╝      ██║   ██║██╔══╝  ██║╚██╗██║██║██╔═██╗ 
+      ██████╔╝██║  ██║██║  ██║██████╔╝   ██║       ╚██████╔╝███████╗██║ ╚████║██║██║  ██╗
+      ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝   ╚═╝        ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝</pre>
+
+        <div class="term-intro">
+          <div class="term-divider" style="margin:12px 0;">─────────────────────────────────────────────────────────────────────────────────────────</div>
+          <div class="prompt-line" style="margin-bottom:6px;">
+            <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span>
+            <span class="output">help</span>
+          </div>
+          <div class="output" style="padding-bottom:8px;">
+            <span class="comment">Available commands:</span><br>
+            &nbsp;&nbsp;<span class="key">GUI</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— enable GUI interface (Its Really Cool You Should Do It)</span><br>
+            &nbsp;&nbsp;<span class="key">motd</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— show message of the day</span><br>         
+            &nbsp;&nbsp;<span class="key">projects</span>  &nbsp;&nbsp;&nbsp;<span class="comment">— list all projects</span><br>
+            &nbsp;&nbsp;<span class="key">about</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— who is this guy</span><br>
+            &nbsp;&nbsp;<span class="key">skills</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— technical skills &amp; certs</span><br>
+            &nbsp;&nbsp;<span class="key">experience</span>  &nbsp;<span class="comment">— work history</span><br>
+            &nbsp;&nbsp;<span class="key">contact</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— get in touch</span><br>
+            &nbsp;&nbsp;<span class="key">social</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— social links</span><br>
+            &nbsp;&nbsp;<span class="key">clear</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— clear terminal</span><br>
+            &nbsp;&nbsp;<span class="key">scroll</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— scroll down to browse normally</span><br>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- input -->
+      <div class="input-row">
+        <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span>
+        <div class="term-input-wrap">
+          <input type="text" id="term-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-left"><span>brady</span>@<span>genik</span>:~$ — built from scratch · bradygenik.com</div>
+    <div class="footer-socials">
       <a href="https://instagram.com/brady_genik2" target="_blank"><i class="fab fa-instagram"></i></a>
       <a href="https://github.com/brady9999" target="_blank"><i class="fab fa-github"></i></a>
       <a href="https://linkedin.com/in/bradygenik" target="_blank"><i class="fab fa-linkedin"></i></a>
     </div>
+    <div class="footer-right">© 2026 Brady Genik</div>
+  </footer>
 
-    <div class="hamburger" id="hamburger">
-      <i class="fas fa-bars"></i>
+</div><!-- end #main -->
+
+<script>
+/* ═══════════════════════════════════════
+   CURSOR
+═══════════════════════════════════════ */
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+});
+/* ═══════════════════════════════════════
+   BOOT SEQUENCE
+═══════════════════════════════════════ */
+const bootLines = ['b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11','b12','b13','b14','b15','b16','b17','b18','b19','b20','b21'];
+const delays    = [0,80,180,280,380,460,540,600,700,800,880,960,1040,1120,1200,1300,1420,1520,1600,1680,1760,1900];
+
+bootLines.forEach((id, i) => {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('show');
+  }, delays[i]);
+});
+
+// progress bar
+setTimeout(() => {
+  const barWrap = document.getElementById('bbar');
+  const fill = document.getElementById('boot-fill');
+  const pct  = document.getElementById('boot-pct');
+  if (barWrap) barWrap.classList.add('show');
+  let p = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 8 + 2;
+    if (p >= 100) { p = 100; clearInterval(iv); }
+    if (fill) fill.style.width = p + '%';
+    if (pct) pct.textContent = Math.floor(p) + '%';
+  }, 60);
+}, 1950);
+
+// final lines + reveal main
+setTimeout(() => {
+  const b22 = document.getElementById('b22'); if(b22) b22.classList.add('show');
+  const b23 = document.getElementById('b23'); if(b23) b23.classList.add('show');
+}, 3600);
+
+setTimeout(() => {
+  const boot = document.getElementById('boot-screen');
+  boot.style.transition = 'opacity 0.5s';
+  boot.style.opacity = '0';
+  setTimeout(() => {
+    boot.style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('term-input').focus();
+    // kick off scroll reveals
+    initReveal();
+  }, 500);
+}, 4100);
+
+/* TERMINAL COMMANDS */
+const COMMANDS = {
+  gui: () => {
+  // inject overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:var(--bg);z-index:9998;
+    display:flex;flex-direction:column;padding:40px;
+    font-family:var(--mono);font-size:13px;line-height:1.8;overflow:hidden;
+  `;
+
+  const lines = [
+    { text: 'GENIK-OS v2.6.0  |  Launching GUI...', color: 'var(--green)' },
+    { text: ' ', color: 'var(--muted)' },
+    { text: '[ INIT ]  Starting display server...', color: 'var(--white)' },
+    { text: '[ OK   ]  Wayland compositor loaded', color: 'var(--green)' },
+    { text: '[ OK   ]  GNOME Shell 42.5 initialized', color: 'var(--green)' },
+    { text: '[ OK   ]  Loading window manager...', color: 'var(--green)' },
+    { text: '[ OK   ]  Desktop environment ready', color: 'var(--green)' },
+    { text: ' ', color: 'var(--muted)' },
+    { text: '[ INIT ]  Mounting filesystem...', color: 'var(--white)' },
+    { text: '[ OK   ]  /home/brady mounted', color: 'var(--green)' },
+    { text: '[ OK   ]  /home/brady/projects mounted', color: 'var(--green)' },
+    { text: '[ OK   ]  /home/brady/.hidden mounted', color: 'var(--green)' },
+    { text: '[ WARN ]  resume.pdf — coming soon', color: 'var(--amber)' },
+    { text: ' ', color: 'var(--muted)' },
+    { text: '[ INIT ]  Loading portfolio services...', color: 'var(--white)' },
+    { text: '[ OK   ]  files.service started', color: 'var(--green)' },
+    { text: '[ OK   ]  terminal.service started', color: 'var(--green)' },
+    { text: '[ OK   ]  projects.service started', color: 'var(--green)' },
+    { text: '[ OK   ]  settings.service started', color: 'var(--green)' },
+    { text: ' ', color: 'var(--muted)' },
+    { text: '[ DONE ]  GUI ready. Launching desktop...', color: 'var(--cyan)' },
+  ];
+
+  // build line elements
+  lines.forEach(l => {
+    const el = document.createElement('div');
+    el.textContent = l.text;
+    el.style.cssText = `opacity:0;white-space:pre;color:${l.color};`;
+    overlay.appendChild(el);
+  });
+
+  // progress bar row
+  const barRow = document.createElement('div');
+  barRow.style.cssText = `display:flex;align-items:center;gap:12px;opacity:0;margin-top:4px;`;
+  barRow.innerHTML = `
+    <span style="color:var(--green);font-size:13px;">[ PROG ] </span>
+    <div style="height:6px;width:280px;background:var(--border);border-radius:1px;overflow:hidden;">
+      <div id="gui-boot-fill" style="height:100%;width:0%;background:var(--green);box-shadow:0 0 10px var(--green);transition:width 1.2s ease;"></div>
     </div>
-  </nav>
-</header>
-    <section id="hero" class="hero" aria-label="Introduction">
-      <div class="hero-left">
-        <div class="eyebrow">Network Systems Admin Student at MITT </br>
-            Intern at City Of Winnipeg Tech and Innovation Department</div>
-         <h1>I'm Brady Genik, </br>
-             Please look over portfolio </br>
-             and try and tell me what I can't do!</h1>
-         <p>Just please don't bring up my web dev skills</p>
-      </div>
-    </section>
+    <span id="gui-boot-pct" style="color:var(--green);font-size:13px;">0%</span>
+  `;
+  overlay.appendChild(barRow);
+  document.body.appendChild(overlay);
 
-    <section class="panel">
-        <h2>Education and Experience</h2>
+  const els = overlay.querySelectorAll('div');
 
-        <div class="education-timeline">
+  // show lines one by one
+  const baseDelay = 80;
+  lines.forEach((_, i) => {
+    setTimeout(() => {
+      els[i].style.opacity = '1';
+    }, i * baseDelay);
+  });
 
-            <div class="edu-item">
-                <h3>Gondola Pizza - Cook, Driver, Cashier, Tech-Support <span class="year">2022 - Present</span></h3>
-                <p>I work as an all in one employee and have been working here since my grade 10 year.</p>
-            </div>
+  // show progress bar after lines
+  const barStart = lines.length * baseDelay + 100;
+  setTimeout(() => {
+    barRow.style.opacity = '1';
+    const fill = document.getElementById('gui-boot-fill');
+    const pct  = document.getElementById('gui-boot-pct');
+    let p = 0;
+    const iv = setInterval(() => {
+      p += Math.random() * 8 + 2;
+      if (p >= 100) { p = 100; clearInterval(iv); }
+      fill.style.width = p + '%';
+      pct.textContent  = Math.floor(p) + '%';
+    }, 60);
+  }, barStart);
 
-            <div class="edu-item">
-                <h3>MITT - Network Systems Admin <span class="year">2023 - 2026</span></h3>
-                <p>In grade 11 I entered MITT and gained my Cloud Network Technition certification by grade 12, Now i'm working towards my NSA diploma</p>
-            </div>
+  // redirect after everything
+  const totalTime = barStart + 1600;
+  setTimeout(() => {
+    overlay.style.transition = 'opacity 0.5s';
+    overlay.style.opacity = '0';
+    setTimeout(() => window.location.href = '/Desktop.html', 500);
+  }, totalTime);
 
-            <div class="edu-item">
-                <h3>City of Winnipeg - Tech & Innovation Internship <span class="year">Jan 2026 - Apr 2026</span></h3>
-                <p>This internship is for my WIL in order to gain my NSA diploma, I'm working with automation tools, physical enterprise level devices and networking infrastructure tools.</p>
-            </div>
+  return `<span style="color:var(--green)">✓ launching GUI...</span>`;
+},
 
-        </div>
-    </section>
+  motd: () => `
+  <span class="warn"> Status   :</span> <span class="success">● LIVE</span> — Currently interning @ City of Winnipeg<br>
+  <span class="key">  Location :</span> Winnipeg, MB, Canada<br>
+  <span class="key">  Program  :</span> Network Systems Administrator — MITT (2023–2026)<br>
+  <span class="key">  Focus    :</span> Networking · Cybersecurity · Building cool stuff<br>
+  <span class="key">  Certs    :</span> Cloud Network Technician<br>`,
 
-    <footer>
-        <p>Website Designed By Brady Genik</p>
-    </footer>
-    <script src="/JS/script.js"></script>
+  help: () => `<span class="comment">Available commands:</span></br>
+  <span class="key">projects</span>    — list all projects</br>
+  <span class="key">about</span>       — who is this guy</br>
+  <span class="key">skills</span>      — technical skills &amp; certs</br>
+  <span class="key">experience</span>  — work history</br>
+  <span class="key">contact</span>     — get in touch</br>
+  <span class="key">social</span>      — social links</br>
+  <span class="key">Portfolio</span>   — Access GUI portfolio</br>
+  <span class="key">clear</span>       — clear terminal</br>`,
+
+  whoami: () => `<span class="success">brady_genik</span> — NSA student @ MITT · Intern @ City of Winnipeg
+<span class="comment"># Builder. Network nerd. Extremely loud</span>`,
+
+  projects: () => `<span class="comment">// ~/projects — 6 entries</span></br>
+  <span class="key">[01]</span> <span class="success">Apollo</span>         <span class="val" style="color:var(--blue)">in_progress</span>  AI music tool</br>
+  <span class="key">[02]</span> <span class="success">Wrangler Dash</span>  <span class="success">done</span>         Modular error dashboard</br>
+  <span class="key">[03]</span> <span class="success">Athena</span>         <span class="warn">paused</span>       Brutally honest AI assistant</br>
+  <span class="key">[04]</span> <span class="success">Hermes</span>         <span class="val" style="color:var(--blue)">in_progress</span>  Note-taking app</br>
+  <span class="key">[05]</span> <span class="success">Hephaestus</span>     <span class="success">done</span>         Browser art studio</br>`,
+
+  about: () => `<span class="key">name</span>       = <span class="success">"Brady Genik"</span></br>
+<span class="key">location</span>   = <span class="warn">"Winnipeg, MB"</span></br>
+<span class="key">status</span>     = <span class="success">ACTIVE</span> — interning @ City of Winnipeg</br>
+<span class="key">program</span>    = <span class="val" style="color:var(--blue)">"NSA @ MITT (2023–2026)"</span></br>
+<span class="key">fun_fact</span>   = <span class="comment">"I Own A Tech Start Up called Dustyboot co"</span></br>`,
+
+  skills: () => `<span class="comment">// loaded kernel modules:</span></br>
+  <span class="key">networking</span>  CCNA · Cisco IOS · VLANs · Routing · Subnetting</br>
+  <span class="key">security</span>    CompTIA Security+ · Azure · Zero Trust · IAM</br>
+  <span class="key">sysadmin</span>    Linux · Windows Server · Active Directory · PowerShell</br>
+  <span class="key">cloud</span>       Azure · Cloud Network Technician</br>
+  <span class="key">dev</span>         Python · Flask · HTML · CSS · JavaScript</br>
+  <span class="key">hardware</span>    APs · Switches · Routers · enterprise infrastructure</br>`,
+
+  experience: () => `<span class="comment">// work history — chronological desc</span></br>
+  <span class="key">2026</span>  City of Winnipeg  — <span class="success">Tech &amp; Innovation Intern</span></br>
+  <span class="key">2023</span>  MITT              — <span class="val" style="color:var(--blue)">NSA Student (ongoing)</span></br>
+  <span class="key">2022</span>  Gondola Pizza     — <span class="warn">Cook · Driver · Cashier · "Tech Support"</span></br>`,
+
+  contact: () => `<span class="comment">// reach me at:</span></br>
+  <span class="key">github</span>    → <a class="link" href="https://github.com/brady9999" target="_blank">github.com/brady9999</a></br>
+  <span class="key">linkedin</span>  → <a class="link" href="https://linkedin.com/in/bradygenik" target="_blank">linkedin.com/in/bradygenik</a></br>
+  <span class="key">instagram</span> → <a class="link" href="https://instagram.com/brady_genik2" target="_blank">instagram.com/brady_genik2</a></br>
+  <span class="key">form</span>      → <a class="link" href="/Pages/contact.html">bradygenik.com/contact</a></br>
+  <span class="success">✓ always open to opportunities, collabs, or just talking tech</span>`,
+
+  social: () => `<span class="key">github</span>    → <a class="link" href="https://github.com/brady9999" target="_blank">github.com/brady9999</a></br>
+<span class="key">linkedin</span>  → <a class="link" href="https://linkedin.com/in/bradygenik" target="_blank">linkedin.com/in/bradygenik</a></br>
+<span class="key">instagram</span> → <a class="link" href="https://instagram.com/brady_genik2" target="_blank">instagram.com/brady_genik2</a></br>`,
+
+  scroll: () => {
+    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+    return `<span class="success">✓ scrolling to projects...</span>`;
+  },
+
+  clear: () => {
+    document.getElementById('history').innerHTML = '';
+    return null;
+  },
+
+  ls: () => `<span class="key">drwxr-xr-x</span>  projects/</br>
+<span class="key">drwxr-xr-x</span>  about/</br>
+<span class="key">drwxr-xr-x</span>  experience/</br>
+<span class="key">-rw-r--r--</span>  brady_genik.conf</br>`,
+
+  pwd: () => `<span class="success">/home/brady/portfolio</span>`,
+
+  date: () => `<span class="success">${new Date().toString()}</span>`,
+
+  sudo: (args) => `<span class="err">[sudo] password for brady: </span>
+<span class="err">brady is not in the sudoers file. This incident will be reported.</span>
+<span class="comment"># (jk, this is just a portfolio site)</span>`,
+
+  uname: () => `<span class="success">GENIK-OS 2.6.0 brady-portfolio #1 SMP JetBrains-Mono</span>`,
+
+  placeholder: () => `<span class="comment">// this is literally a placeholder command, come on</span>`,
+};
+
+const input  = document.getElementById('term-input');
+const history = document.getElementById('history');
+let cmdHistory = [];
+let histIdx = -1;
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const raw = input.value.trim();
+    input.value = '';
+    histIdx = -1;
+    if (!raw) return;
+
+    cmdHistory.unshift(raw);
+    const parts = raw.split(' ');
+    const cmd   = parts[0].toLowerCase();
+    const args  = parts.slice(1);
+
+    const block = document.createElement('div');
+    block.className = 'hist-block';
+
+    const cmdLine = document.createElement('div');
+    cmdLine.className = 'hist-cmd prompt-line';
+    cmdLine.innerHTML = `<span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span><span class="output">${escHtml(raw)}</span>`;
+    block.appendChild(cmdLine);
+
+    let out = null;
+    if (COMMANDS[cmd]) {
+      out = COMMANDS[cmd](args);
+    } else {
+      out = `<span class="err">command not found: ${escHtml(cmd)}</span>  <span class="comment"># try 'help'</span>`;
+    }
+
+    if (out !== null) {
+      const outDiv = document.createElement('div');
+      outDiv.className = 'hist-out output';
+      outDiv.innerHTML = out;
+      block.appendChild(outDiv);
+    }
+
+    history.appendChild(block);
+    history.scrollTop = history.scrollHeight;
+  }
+
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < cmdHistory.length - 1) histIdx++;
+    input.value = cmdHistory[histIdx] || '';
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) histIdx--;
+    else { histIdx = -1; input.value = ''; return; }
+    input.value = cmdHistory[histIdx] || '';
+  }
+
+  // Tab autocomplete
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const partial = input.value.toLowerCase();
+    const match = Object.keys(COMMANDS).find(k => k.startsWith(partial));
+    if (match) input.value = match;
+  }
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Focus terminal on click anywhere in terminal
+document.querySelector('.terminal-hero').addEventListener('click', () => input.focus());
+
+/* ═══════════════════════════════════════
+   SCROLL REVEALS
+═══════════════════════════════════════ */
+function initReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        ro.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.07 });
+  els.forEach(el => ro.observe(el));
+}
+</script>
 </body>
 </html>
