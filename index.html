@@ -322,6 +322,46 @@ a { text-decoration: none; color: inherit; }
 ═══════════════════════════════════════ */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
 .reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 640px) {
+  .term-window {
+    padding: 16px 16px;
+  }
+
+  .ascii-art {
+    font-size: 5px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .tb-title {
+    font-size: 10px;
+  }
+
+  .ps1 {
+    font-size: 12px;
+  }
+
+  .output {
+    font-size: 12px;
+  }
+
+  #term-input {
+    font-size: 12px;
+  }
+
+  .input-row {
+    padding-bottom: 8px;
+  }
+
+  .footer {
+    display: none; /* too cramped on mobile */
+  }
+}
 </style>
 </head>
 <body>
@@ -394,14 +434,13 @@ a { text-decoration: none; color: inherit; }
       ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝   ╚═╝        ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝</pre>
 
         <div class="term-intro">
-          <div class="term-divider" style="margin:12px 0;">─────────────────────────────────────────────────────────────────────────────────────────</div>
           <div class="prompt-line" style="margin-bottom:6px;">
             <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span>
             <span class="output">help</span>
           </div>
           <div class="output" style="padding-bottom:8px;">
             <span class="comment">Available commands:</span><br>
-            &nbsp;&nbsp;<span class="key">GUI</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— enable GUI interface (Its Really Cool You Should Do It)</span><br>
+            &nbsp;&nbsp;<span class="key">GUI</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— enable GUI interface</span><br>
             &nbsp;&nbsp;<span class="key">motd</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— show message of the day</span><br>         
             &nbsp;&nbsp;<span class="key">projects</span>  &nbsp;&nbsp;&nbsp;<span class="comment">— list all projects</span><br>
             &nbsp;&nbsp;<span class="key">about</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— who is this guy</span><br>
@@ -499,6 +538,9 @@ setTimeout(() => {
 /* TERMINAL COMMANDS */
 const COMMANDS = {
   gui: () => {
+    if (window.innerWidth < 768) {
+    return `<span class="err">gui: not available on mobile</span> <span class="comment"># try on desktop for the full experience</span>`;
+  }
   // inject overlay
   const overlay = document.createElement('div');
   overlay.style.cssText = `
