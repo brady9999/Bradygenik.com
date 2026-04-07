@@ -34,7 +34,7 @@ function notif(icon, title, body) {
   nTimer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
-/* ── CLOCK ── */
+/* Clock */
 function tick(){
   const n=new Date(),D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -44,7 +44,7 @@ function tick(){
 tick(); setInterval(tick,10000);
 
 
-/* ── WINDOWS ── */
+/* Window */
 let topZ=200;
 function focusWin(id){
   document.querySelectorAll('.win').forEach(w=>w.classList.remove('focus'));
@@ -76,7 +76,7 @@ document.querySelectorAll('.win').forEach(w=>{
   w.addEventListener('mousedown',()=>focusWin(w.id));
 });
 
-/* ── DRAG WINDOWS ── */
+/* Drag Windows */
 document.querySelectorAll('.whdr').forEach(hdr=>{
   const win=document.getElementById(hdr.dataset.w);
   let drag=false,ox=0,oy=0;
@@ -95,7 +95,7 @@ document.querySelectorAll('.whdr').forEach(hdr=>{
   document.addEventListener('mouseup',()=>{drag=false;});
 });
 
-/* ── RESIZE WINDOWS ── */
+/* Resize Windows */
 document.querySelectorAll('.wrsz').forEach(h=>{
   const win=h.closest('.win');
   let r=false,sx=0,sy=0,sw=0,sh=0;
@@ -106,11 +106,12 @@ document.querySelectorAll('.wrsz').forEach(h=>{
 
 
 
-/* ── DESKTOP ICONS ── */
+/* Desktop icons */
 const DESK_ICONS=[
   {lbl:'files',          ico:'🗂️',bg:'linear-gradient(135deg,#5c9bd6,#3a7abf)', action:()=>openWin('w-files')},
-  {lbl:'brady.conf',     ico:'📄',bg:'linear-gradient(135deg,#1565c0,#0d47a1)',action:()=>openWin('w-conf')},
+  {lbl:'bradygenik.conf',     ico:'📄',bg:'linear-gradient(135deg,#1565c0,#0d47a1)',action:()=>openWin('w-conf')},
   {lbl:'brady.ascii',    ico:'🖼️',bg:'linear-gradient(135deg,#2e7d32,#1b5e20)', action:()=>openWin('w-ascii')},
+  {lbl:'Malicious.sh',   ico:'⚠️', bg:'linear-gradient(135deg,#ff0000,#8b0000)', action:()=>openWin('w-malicious')},
   {lbl:'Trash', ico:'🗑️', bg:'linear-gradient(135deg,#4a4a4a,#2a2a2a)'},
 ];
 const di=document.getElementById('desk-icons');
@@ -131,11 +132,11 @@ document.getElementById('desktop').addEventListener('click',()=>{
   document.querySelectorAll('.icon').forEach(d=>d.classList.remove('sel'));
 });
 
-/* ── FILE MANAGER ── */
+/* File Manager */
 const FOLDERS = {
   home: {
     path: '/home/brady',
-    title: "Files — brady's Home",
+    title: "Files - brady's Home",
     files: [
       {n:'projects',        ico:'🗂️', bg:'linear-gradient(135deg,#f9a825,#f57c00)', a:()=>navigateFolder('projects')},
       {n:'brady.conf',      ico:'📄', bg:'linear-gradient(135deg,#1565c0,#0d47a1)', a:()=>openWin('w-conf')},
@@ -145,17 +146,18 @@ const FOLDERS = {
   },
   desktop: {
     path: '/home/brady/Desktop',
-    title: 'Files — Desktop',
+    title: 'Files - Desktop',
     files: [
       {n:'projects',        ico:'🗂️', bg:'linear-gradient(135deg,#f9a825,#f57c00)', a:()=>navigateFolder('projects')},
       {n:'brady.conf',      ico:'📄', bg:'linear-gradient(135deg,#1565c0,#0d47a1)', a:()=>openWin('w-conf')},
       {n:'brady.ascii',     ico:'🖼️', bg:'linear-gradient(135deg,#2e7d32,#1b5e20)', a:()=>openWin('w-ascii')},
       {n:'.hidden',         ico:'🔒', bg:'linear-gradient(135deg,#6a1b9a,#4a148c)', a:()=>{openWin('w-hidden')}},
+      {n:'Malicious.sh',   ico:'⚠️', bg:'linear-gradient(135deg,#ff0000,#8b0000)', a:()=>{openWin('w-malicious')}},
     ]
   },
   downloads: {
     path: '/home/brady/Downloads',
-    title: 'Files — Downloads',
+    title: 'Files - Downloads',
     files: [
       {n:'resume.pdf',   ico:'📑', bg:'linear-gradient(135deg,#b71c1c,#880e0e)'},
       {n:'genik-os.iso', ico:'💿', bg:'linear-gradient(135deg,#E95420,#bf360c)'},
@@ -163,7 +165,7 @@ const FOLDERS = {
   },
   documents: {
     path: '/home/brady/Documents',
-    title: 'Files — Documents',
+    title: 'Files - Documents',
     files: [
       {n:'notes.txt',     ico:'📝', bg:'linear-gradient(135deg,#455a64,#263238)'},
       {n:'cert_cloud.pdf',ico:'📜', bg:'linear-gradient(135deg,#1a237e,#0d47a1)'},
@@ -171,14 +173,14 @@ const FOLDERS = {
   },
   projects: {
     path: '/home/brady/projects',
-    title: 'Files — Projects',
+    title: 'Files - Projects',
     files: [
       {n:'Apollo',       ico:'🎵', bg:'linear-gradient(135deg,#1565c0,#0d47a1)', a:()=>window.open('https://github.com/brady9999/Apollo','_blank')},
       {n:'Wrangler Dash',ico:'📊', bg:'linear-gradient(135deg,#2e7d32,#1b5e20)', a:()=>window.open('https://github.com/brady9999/Wrangler-Dashboard','_blank')},
       {n:'Athena',       ico:'🦉', bg:'linear-gradient(135deg,#6a1b9a,#4a148c)', a:()=>window.open('https://github.com/brady9999/Athena','_blank')},
       {n:'Hermes',       ico:'📝', bg:'linear-gradient(135deg,#e65100,#bf360c)', a:()=>window.open('https://github.com/brady9999/Hermes','_blank')},
       {n:'Hephaestus',   ico:'🎨', bg:'linear-gradient(135deg,#558b2f,#33691e)', a:()=>window.open('https://github.com/brady9999/Hephaestus','_blank')},
-      {n:'???.zip',      ico:'❓', bg:'linear-gradient(135deg,#37474f,#263238)', a:()=>notif('❓','???.zip','This file is encrypted.')},
+      {n:'???.zip',      ico:'❓', bg:'linear-gradient(135deg,#37474f,#263238)', a:()=>notif('','')},
     ]
   },
 };
@@ -229,11 +231,18 @@ fmBtns[2].addEventListener('click', () => navigateFolder('home'));
 
 renderFolder('home');
 
+const diM = document.getElementById('w-malicious');
+if (diM) {
+  diM.addEventListener('click', () => MaliciousScript());
+} else {
+  console.warn('di-settings not found - check your dock HTML has id="di-settings"');
+}
+
 const diSettings = document.getElementById('di-settings');
 if (diSettings) {
   diSettings.addEventListener('click', () => virusScan());
 } else {
-  console.warn('di-settings not found — check your dock HTML has id="di-settings"');
+  console.warn('di-settings not found - check your dock HTML has id="di-settings"');
 }
 
 function virusScan() {
@@ -249,12 +258,12 @@ function virusScan() {
     { text:'[ SCAN ]  Initializing GENIK-AV v1.3.3.7...', color:'#f0f0f0', delay:0 },
     { text:'[ OK   ]  Signature database loaded (last updated: never)', color:'#4CAF50', delay:300 },
     { text:'[ SCAN ]  Scanning /home/brady...', color:'#f0f0f0', delay:700 },
-    { text:'[ OK   ]  /home/brady/projects — clean', color:'#4CAF50', delay:1100 },
-    { text:'[ OK   ]  /home/brady/resume.pdf — clean (still a placeholder tho)', color:'#4CAF50', delay:1500 },
-    { text:'[ WARN ]  /home/brady/.hidden — suspicious but intentional', color:'#FFB000', delay:1900 },
+    { text:'[ OK   ]  /home/brady/projects - clean', color:'#4CAF50', delay:1100 },
+    { text:'[ OK   ]  /home/brady/resume.pdf - clean (still a placeholder tho)', color:'#4CAF50', delay:1500 },
+    { text:'[ WARN ]  /home/brady/.hidden - suspicious but intentional', color:'#FFB000', delay:1900 },
     { text:'[ SCAN ]  Scanning system processes...', color:'#f0f0f0', delay:2400 },
-    { text:'[ OK   ]  portfolio.service — clean', color:'#4CAF50', delay:2800 },
-    { text:'[ OK   ]  terminal.service — clean', color:'#4CAF50', delay:3100 },
+    { text:'[ OK   ]  portfolio.service - clean', color:'#4CAF50', delay:2800 },
+    { text:'[ OK   ]  terminal.service - clean', color:'#4CAF50', delay:3100 },
     { text:'[ SCAN ]  Deep scanning brady_genik.conf...', color:'#f0f0f0', delay:3500 },
     { text:'[ !!!  ]  THREAT DETECTED: too_much_ambition.exe', color:'#FF4444', delay:4100 },
     { text:'[ !!!  ]  THREAT DETECTED: caffeine_dependency.ko', color:'#FF4444', delay:4400 },
@@ -263,7 +272,7 @@ function virusScan() {
     { text:' ', color:'#555', delay:5400 },
     { text:'[ DONE ]  Scan complete. 3 critical threats found.', color:'#f0f0f0', delay:5800 },
     { text:'[ INFO ]  Recommended action: touch grass, get some sleep', color:'#4DA6FF', delay:6200 },
-    { text:'[ INFO ]  Quarantine failed — threats are core personality traits', color:'#4DA6FF', delay:6600 },
+    { text:'[ INFO ]  Quarantine failed - threats are core personality traits', color:'#4DA6FF', delay:6600 },
     { text:' ', color:'#555', delay:7000 },
     { text:'[ EXIT ]  Click anywhere to dismiss...', color:'#555', delay:7400 },
   ];
@@ -348,9 +357,119 @@ function virusScan() {
   });
 }
 
-/* ── PROJECT DETAILS ── */
+function MaliciousScript() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:#0a0a0a;z-index:9999;
+    display:flex;flex-direction:column;padding:40px;
+    font-family:var(--mono,monospace);font-size:13px;line-height:1.8;
+    overflow:hidden;cursor:pointer;
+  `;
+
+  const lines = [
+    { text:'[ SCAN ]  Initializing malicious script...', color:'#f0f0f0', delay:0 },
+    { text:'[ OK   ]  Signature database loaded (last updated: never)', color:'#4CAF50', delay:300 },
+    { text:'[ SCAN ]  Scanning /home/brady...', color:'#f0f0f0', delay:700 },
+    { text:'[ WARN ]  /home/brady/.hidden - suspicious but intentional', color:'#FFB000', delay:1900 },
+    { text:'[ SCAN ]  Scanning system processes...', color:'#f0f0f0', delay:2400 },
+    { text:'[ OK   ]  portfolio.service - clean', color:'#4CAF50', delay:2800 },
+    { text:'[ OK   ]  terminal.service - clean', color:'#4CAF50', delay:3100 },
+    { text:'[ SCAN ]  Deep scanning Malicious.sh...', color:'#f0f0f0', delay:3500 },
+    { text:'[ !!!  ]  THREAT DETECTED: SCARY.exe', color:'#FF4444', delay:4100 },
+    { text:'[ !!!  ]  THREAT DETECTED: SCRIPT.ko', color:'#FF4444', delay:4400 },
+    { text:'[ !!!  ]  THREAT DETECTED: BEE MOVIE.dll', color:'#FF4444', delay:4700 },
+    { text:'[ WARN ]  THREAT DETECTED: YOU LIKE JAZZ.zip', color:'#FFB000', delay:5000 },
+    { text:' ', color:'#555', delay:5400 },
+    { text:'[ DONE ]  Scan complete. 3 critical threats found.', color:'#f0f0f0', delay:5800 },
+    { text:'[ INFO ]  Recommended action: Grab your popcorn and sit back', color:'#4DA6FF', delay:6200 },
+    { text:'[ INFO ]  Quarantine failed - threat is the greatest movie to exist', color:'#4DA6FF', delay:6600 },
+    { text:' ', color:'#555', delay:7000 },
+    { text:'[ EXIT ]  Click anywhere to dismiss...', color:'#555', delay:7400 },
+  ];
+
+  const content = document.createElement('div');
+  content.style.cssText = `pointer-events:none;`;
+
+  lines.forEach(l => {
+    const el = document.createElement('div');
+    el.textContent = l.text;
+    el.style.cssText = `opacity:0;white-space:pre;color:${l.color};`;
+    setTimeout(() => { el.style.opacity = '1'; }, l.delay);
+    content.appendChild(el);
+  });
+
+  const barRow = document.createElement('div');
+  barRow.style.cssText = `display:flex;align-items:center;gap:12px;opacity:0;margin-top:8px;pointer-events:none;`;
+  barRow.innerHTML = `
+    <span style="color:#4CAF50;font-size:13px;">[ PROG ] </span>
+    <div style="height:6px;width:280px;background:#2a2a2a;border-radius:1px;overflow:hidden;">
+      <div id="av-fill" style="height:100%;width:0%;background:#FF4444;box-shadow:0 0 10px #FF4444;"></div>
+    </div>
+    <span id="av-pct" style="color:#FF4444;font-size:13px;">0%</span>
+  `;
+  content.appendChild(barRow);
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    barRow.style.opacity = '1';
+    const fill = document.getElementById('av-fill');
+    const pct = document.getElementById('av-pct');
+    let p = 0;
+    const iv = setInterval(() => {
+      p += Math.random() * 4 + 1;
+      if (p >= 100) { p = 100; clearInterval(iv); }
+      fill.style.width = p + '%';
+      pct.textContent = Math.floor(p) + '%';
+    }, 120);
+  }, 800);
+
+  let canDismiss = false;
+  setTimeout(() => { canDismiss = true; }, 7500);
+
+  overlay.addEventListener('click', () => {
+    if (!canDismiss) return;
+    overlay.style.transition = 'opacity 0.4s';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.remove();
+
+      notif();
+
+      const malicious = document.createElement('img');
+      malicious.src = '/Images/malicious.gif';
+      malicious.style.cssText = `
+        position:fixed;
+        top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        width:70vw;max-width:800px;
+        border-radius:12px;z-index:9999;
+        box-shadow:0 16px 64px rgba(0,0,0,.8);
+        border:3px solid #333;
+      `;
+      document.body.appendChild(malicious);
+
+      const closeBtn = document.createElement('div');
+      closeBtn.textContent = '✕';
+      closeBtn.style.cssText = `
+        position:fixed;
+        top:calc(50% - 35vw / 1.5);
+        right:calc(50% - 35vw - 12px);
+        background:#333;color:#fff;border-radius:50%;
+        width:28px;height:28px;display:flex;align-items:center;
+        justify-content:center;font-size:14px;cursor:pointer;
+        z-index:10000;box-shadow:0 2px 8px rgba(0,0,0,.6);
+      `;
+      closeBtn.addEventListener('click', () => { malicious.remove(); closeBtn.remove(); });
+      document.body.appendChild(closeBtn);
+
+    }, 400);
+  });
+}
+
+/* Project Details */
 const PROJS={
-  apollo:{t:'Apollo — AI Music Tool',b:`<span class="tc"># apollo/README.md</span>
+  apollo:{t:'Apollo - AI Music Tool',b:`<span class="tc"># apollo/README.md</span>
 
 <span class="tk">status</span> = <span style="color:#5c9bd6">in_progress</span>
 <span class="tk">type</span>   = <span class="tv2">"AI Music Tool"</span>
@@ -361,7 +480,7 @@ const PROJS={
 
 <span class="tk">github</span> = <span class="tv2">"github.com/brady9999/Apollo"</span>
 <span class="tk">github</span> = <span class="tv2">"https://apollo.bradygenik.com/"</span>`},
-  wrangler:{t:'Wrangler Dash — Dashboard',b:`<span class="tc"># wrangler-dash/README.md</span>
+  wrangler:{t:'Wrangler Dash - Dashboard',b:`<span class="tc"># wrangler-dash/README.md</span>
 
 <span class="tk">status</span> = <span class="tg">done</span>
 <span class="tk">type</span>   = <span class="tv2">"Error Dashboard"</span>
@@ -370,7 +489,7 @@ const PROJS={
 # errors and warnings from Wranglers.</span>
 
 <span class="tk">github</span> = <span class="tv2">"github.com/brady9999/Wrangler-Dashboard"</span>`},
-  athena:{t:'Athena — AI Assistant',b:`<span class="tc"># athena/README.md</span>
+  athena:{t:'Athena - AI Assistant',b:`<span class="tc"># athena/README.md</span>
 
 <span class="tk">status</span> = <span style="color:#FFB000">paused</span>
 <span class="tk">type</span>   = <span class="tv2">"AI Assistant"</span>
@@ -380,7 +499,7 @@ const PROJS={
 
 <span class="tk">github</span> = <span class="tv2">"github.com/brady9999/Athena"</span>
 <span class="tk">url</span>    = <span class="tv2">"athena.bradygenik.com"</span>`},
-  hermes:{t:'Hermes — Notes',b:`<span class="tc"># hermes/README.md</span>
+  hermes:{t:'Hermes - Notes',b:`<span class="tc"># hermes/README.md</span>
 
 <span class="tk">status</span> = <span style="color:#5c9bd6">in_progress</span>
 <span class="tk">type</span>   = <span class="tv2">"Note-taking App"</span>
@@ -389,7 +508,7 @@ const PROJS={
 # how a notes app should work.</span>
 
 <span class="tk">github</span> = <span class="tv2">"github.com/brady9999/Hermes"</span>`},
-  hephaestus:{t:'Hephaestus — Art Studio',b:`<span class="tc"># hephaestus/README.md</span>
+  hephaestus:{t:'Hephaestus - Art Studio',b:`<span class="tc"># hephaestus/README.md</span>
 
 <span class="tk">status</span> = <span class="tg">done</span>
 <span class="tk">type</span>   = <span class="tv2">"Creative Tool"</span>
@@ -400,7 +519,7 @@ const PROJS={
 };
 function openProj(k){
   const p=PROJS[k];if(!p)return;
-  document.getElementById('proj-ttl').textContent=p.t+' — Text Editor';
+  document.getElementById('proj-ttl').textContent=p.t+' - Text Editor';
   document.getElementById('proj-body').innerHTML=p.b;
   openWin('w-proj');
 }
@@ -436,7 +555,7 @@ if (tInput) {
 }
 document.getElementById('w-term').addEventListener('click',()=>tInput.focus());
 
-/* ── CONTEXT MENU ── */
+/* Context Menu */
 const ctx=document.getElementById('ctx');
 document.getElementById('desktop').addEventListener('contextmenu',e=>{
   e.preventDefault();
@@ -455,7 +574,7 @@ document.getElementById('ctx-new-file').addEventListener('click');
 
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* ── BOOT ── */
+/* Boot */
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     openWin('w-files');

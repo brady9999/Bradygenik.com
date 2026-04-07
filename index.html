@@ -10,9 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* ═══════════════════════════════════════
-   TOKENS
-═══════════════════════════════════════ */
+/* Global variables */
 :root {
   --bg:        #0C0C0C;
   --bg2:       #111111;
@@ -23,6 +21,7 @@
   --green-glow:rgba(57,255,20,0.15);
   --amber:     #FFB000;
   --red:       #FF4444;
+  --name:      #C084FC;
   --blue:      #4DA6FF;
   --cyan:      #00FFFF;
   --white:     #E8E8E8;
@@ -30,9 +29,7 @@
   --mono: 'JetBrains Mono', monospace;
 }
 
-/* ═══════════════════════════════════════
-   BASE
-═══════════════════════════════════════ */
+/* Body */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
@@ -70,9 +67,7 @@ body::after {
 
 a { text-decoration: none; color: inherit; }
 
-/* ═══════════════════════════════════════
-   CUSTOM CURSOR
-═══════════════════════════════════════ */
+/* Colored cursor */
 .cursor {
   position: fixed;
   width: 2px; height: 18px;
@@ -85,9 +80,7 @@ a { text-decoration: none; color: inherit; }
 }
 @keyframes blink-cursor { 0%,100% { opacity:1; } 50% { opacity:0; } }
 
-/* ═══════════════════════════════════════
-   BOOT SCREEN
-═══════════════════════════════════════ */
+/* Boot up screen*/
 #boot-screen {
   position: fixed; inset: 0;
   background: var(--bg);
@@ -131,14 +124,10 @@ a { text-decoration: none; color: inherit; }
   transition: width 1.4s ease;
 }
 
-/* ═══════════════════════════════════════
-   MAIN — hidden until boot done
-═══════════════════════════════════════ */
+/* Main (Hidden till after boot menu) */
 #main { display: none; }
 
-/* ═══════════════════════════════════════
-   TOP BAR  (like a terminal title bar)
-═══════════════════════════════════════ */
+/* Topbar*/
 .topbar {
   position: fixed; top: 0; left: 0; right: 0;
   height: 36px;
@@ -190,9 +179,7 @@ a { text-decoration: none; color: inherit; }
 
 .tb-time { color: var(--muted); font-size: 11px; }
 
-/* ═══════════════════════════════════════
-   TERMINAL HERO  (interactive shell)
-═══════════════════════════════════════ */
+/* Terminal */
 .terminal-hero {
   height: 100vh;
   padding-top: 36px;
@@ -234,7 +221,7 @@ a { text-decoration: none; color: inherit; }
   flex-wrap: wrap;
 }
 
-.ps1 { color: var(--green); white-space: nowrap; }
+.ps1 { color: var(--green); white-space: pre; }
 .ps1 .u { color: var(--cyan); }
 .ps1 .at { color: var(--muted); }
 .ps1 .host { color: var(--amber); }
@@ -243,8 +230,15 @@ a { text-decoration: none; color: inherit; }
 
 .output { color: var(--white); padding-left: 0; line-height: 1.8; font-size: 13px; }
 .output .key { color: var(--cyan); }
+.output .folder { color: var(--blue); }
+.output .file {
+    color: var(--white);
+    display: inline-block;
+    margin-right: 15px;
+   }
 .output .val { color: var(--white); }
 .output .comment { color: var(--muted); }
+.output .name { color: var(--name); }
 .output .success { color: var(--green); }
 .output .warn { color: var(--amber); }
 .output .err { color: var(--red); }
@@ -266,12 +260,12 @@ a { text-decoration: none; color: inherit; }
   position: relative;
   background: transparent;
 }
-
-#term-input { /*This is the actual input field where you type commands*/  
+/*This is the actual input field where you type commands*/  
+#term-input { 
   background: transparent;
   border: none;
   outline: none;
-  color: var(--green);
+  color: var(--white);
   font-family: var(--mono);
   font-size: 13px;
   width: 100%;
@@ -295,9 +289,7 @@ a { text-decoration: none; color: inherit; }
 
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
-/* ═══════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════ */
+/* Footer */
 .footer {
   background: var(--bg);
   border-top: 1px solid var(--border);
@@ -317,9 +309,7 @@ a { text-decoration: none; color: inherit; }
   .footer { padding: 16px 20px; flex-direction: column; text-align: center; }
 }
 
-/* ═══════════════════════════════════════
-   SCROLL REVEALS
-═══════════════════════════════════════ */
+/* Scroll reveals */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
 .reveal.visible { opacity: 1; transform: none; }
 
@@ -369,27 +359,26 @@ a { text-decoration: none; color: inherit; }
 <!-- CURSOR -->
 <div class="cursor" id="cursor"></div>
 
-<!-- ══════════════ BOOT SCREEN ══════════════ -->
+<!-- Boot screen aspects -->
 <div id="boot-screen">
-  <div class="boot-line green" id="b0">GENIK-OS v2.6.0  |  Copyright (c) Brady Genik  |  All rights reserved</div>
+  <div class="boot-line green" id="b0">GENIK-OS v2.7.3  |  Copyright (c) Brady Genik  |  All rights reserved</div>
   <div class="boot-line muted" id="b1"> </div>
   <div class="boot-line white" id="b2">[ BIOS ]  Initializing hardware...</div>
   <div class="boot-line green" id="b3">[ OK   ]  CPU: Brady_Genik_v1  @  max_effort</div>
   <div class="boot-line green" id="b4">[ OK   ]  Memory: loaded successfully</div>
   <div class="boot-line green" id="b5">[ OK   ]  Storage: /projects  /skills  /experience  mounted</div>
-  <div class="boot-line amber" id="b6">[ WARN ]  Sleep schedule module not found — continuing anyway</div>
   <div class="boot-line muted" id="b7"> </div>
   <div class="boot-line white" id="b8">[ BOOT ]  Loading kernel modules...</div>
   <div class="boot-line green" id="b9">[ OK   ]  networking.ko  (CCNA, Cisco IOS, VLANs, routing)</div>
   <div class="boot-line green" id="b10">[ OK   ]  security.ko   (CompTIA Security+, Azure, Zero Trust)</div>
   <div class="boot-line green" id="b11">[ OK   ]  devtools.ko   (Python, Flask, HTML, CSS, JS)</div>
   <div class="boot-line green" id="b12">[ OK   ]  linux.ko      (Ubuntu, bash, systemd, Active Directory)</div>
-  <div class="boot-line amber" id="b13">[ WARN ]  sleep_schedule.ko — module timed out, skipping</div>
+  <div class="boot-line amber" id="b13">[ WARN ]  sleep_schedule.ko - module timed out, skipping</div>
   <div class="boot-line muted" id="b14"> </div>
   <div class="boot-line white" id="b15">[ INIT ]  Starting services...</div>
-  <div class="boot-line green" id="b16">[ OK   ]  intern.service     (City of Winnipeg — Tech &amp; Innovation)</div>
-  <div class="boot-line green" id="b17">[ OK   ]  student.service    (MITT — Network Systems Admin)</div>
-  <div class="boot-line green" id="b18">[ OK   ]  projects.service   (Apollo, Athena, Hermes, Hephaestus...)</div>
+  <div class="boot-line green" id="b16">[ OK   ]  intern.service     (City of Winnipeg - Tech &amp; Innovation)</div>
+  <div class="boot-line green" id="b17">[ OK   ]  student.service    (MITT - Network Systems Admin)</div>
+  <div class="boot-line green" id="b18">[ OK   ]  projects.service   (Argus, Apollo, Athena, Hermes, Hephaestus...)</div>
   <div class="boot-line green" id="b19">[ OK   ]  portfolio.service  (bradygenik.com)</div>
   <div class="boot-line muted" id="b20"> </div>
   <div class="boot-line cyan"  id="b21">[ LOAD ]  Rendering terminal...</div>
@@ -402,10 +391,10 @@ a { text-decoration: none; color: inherit; }
   <div class="boot-line green" id="b23">[ DONE ]  System ready.  Welcome, visitor.</div>
 </div>
 
-<!-- ══════════════ MAIN ══════════════ -->
+<!-- Main (Hidden till after boot menu) -->
 <div id="main">
 
-  <!-- TOP BAR -->
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
       <div class="tb-dots">
@@ -415,11 +404,11 @@ a { text-decoration: none; color: inherit; }
       </div>
     </div>
     <div class="topbar-center">
-      <div class="tb-title"><b>brady</b>@<b>genik</b>:~$ — Terminal</div>
+      <!--<div class="tb-title"><b>brady</b>@<b>genik</b>:~$ - Terminal</div> -->
     </div>
   </div>
 
-  <!-- TERMINAL HERO -->
+  <!-- Terminal -->
   <section class="terminal-hero" id="terminal">
     <div class="term-window">
 
@@ -431,46 +420,38 @@ a { text-decoration: none; color: inherit; }
       ██████╔╝██████╔╝███████║██║  ██║ ╚████╔╝     ██║  ███╗█████╗  ██╔██╗ ██║██║█████╔╝ 
       ██╔══██╗██╔══██╗██╔══██║██║  ██║  ╚██╔╝      ██║   ██║██╔══╝  ██║╚██╗██║██║██╔═██╗ 
       ██████╔╝██║  ██║██║  ██║██████╔╝   ██║       ╚██████╔╝███████╗██║ ╚████║██║██║  ██╗
-      ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝   ╚═╝        ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝</pre>
-
+      ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝   ╚═╝        ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
+    </pre>
         <div class="term-intro">
           <div class="prompt-line" style="margin-bottom:6px;">
-            <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span>
-            <span class="output">help</span>
-          </div>
-          <div class="output" style="padding-bottom:8px;">
-            <span class="comment">Available commands:</span><br>
-            &nbsp;&nbsp;<span class="key">GUI</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— enable GUI interface</span><br>
-            &nbsp;&nbsp;<span class="key">motd</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— show message of the day</span><br>         
-            &nbsp;&nbsp;<span class="key">projects</span>  &nbsp;&nbsp;&nbsp;<span class="comment">— list all projects</span><br>
-            &nbsp;&nbsp;<span class="key">about</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— who is this guy</span><br>
-            &nbsp;&nbsp;<span class="key">skills</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— technical skills &amp; certs</span><br>
-            &nbsp;&nbsp;<span class="key">experience</span>  &nbsp;<span class="comment">— work history</span><br>
-            &nbsp;&nbsp;<span class="key">contact</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— get in touch</span><br>
-            &nbsp;&nbsp;<span class="key">social</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— social links</span><br>
-            &nbsp;&nbsp;<span class="key">clear</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— clear terminal</span><br>
-            &nbsp;&nbsp;<span class="key">scroll</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">— scroll down to browse normally</span><br>
+            <pre class="ps1">
+     ┌────────────────────────────────────────────────────────────────────────────┐
+     │                UNAUTHORIZED ACCESS IS STRICTLY PROHIBITED                  │
+     │               For list of files please run the 'ls' command                │
+     │              this will display all files in current directory              │
+     │                      To access files on this system                        │
+     │             you must use the commands used in linux server cli's           │
+     │                or just use the 'help' command to get started.              │
+     └────────────────────────────────────────────────────────────────────────────┘
+            </pre>
           </div>
         </div>
-
       </div>
-
-      <!-- input -->
+            <!-- input -->
       <div class="input-row">
-        <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span>
+        <span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:/home/brady</span><span class="dollar">$ </span></span>
         <div class="term-input-wrap">
           <input type="text" id="term-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- Footer -->
   <footer class="footer">
-    <div class="footer-left"><span>brady</span>@<span>genik</span>:~$ — built from scratch · bradygenik.com</div>
+    <div class="footer-left">Genik Development</div>
     <div class="footer-socials">
-      <a href="https://instagram.com/brady_genik2" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://instagram.com/bradygenik.ps1" target="_blank"><i class="fab fa-instagram"></i></a>
       <a href="https://github.com/brady9999" target="_blank"><i class="fab fa-github"></i></a>
       <a href="https://linkedin.com/in/bradygenik" target="_blank"><i class="fab fa-linkedin"></i></a>
     </div>
@@ -480,17 +461,14 @@ a { text-decoration: none; color: inherit; }
 </div><!-- end #main -->
 
 <script>
-/* ═══════════════════════════════════════
-   CURSOR
-═══════════════════════════════════════ */
+
+/* Cursor */
 const cursor = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
   cursor.style.left = e.clientX + 'px';
   cursor.style.top  = e.clientY + 'px';
 });
-/* ═══════════════════════════════════════
-   BOOT SEQUENCE
-═══════════════════════════════════════ */
+/* Boot up screen */
 const bootLines = ['b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11','b12','b13','b14','b15','b16','b17','b18','b19','b20','b21'];
 const delays    = [0,80,180,280,380,460,540,600,700,800,880,960,1040,1120,1200,1300,1420,1520,1600,1680,1760,1900];
 
@@ -535,182 +513,415 @@ setTimeout(() => {
   }, 500);
 }, 4100);
 
-/* TERMINAL COMMANDS */
+/* Terminal cmd*/
 const COMMANDS = {
-  gui: () => {
-    if (window.innerWidth < 768) {
-    return `<span class="err">gui: not available on mobile</span> <span class="comment"># try on desktop for the full experience</span>`;
-  }
-  // inject overlay
-  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:var(--bg);z-index:9998;
-    display:flex;flex-direction:column;padding:40px;
-    font-family:var(--mono);font-size:13px;line-height:1.8;overflow:hidden;
-  `;
+    // Cmd outputs and formatting for each cmd
 
-  const lines = [
-    { text: 'GENIK-OS v2.6.0  |  Launching GUI...', color: 'var(--green)' },
-    { text: ' ', color: 'var(--muted)' },
-    { text: '[ INIT ]  Starting display server...', color: 'var(--white)' },
-    { text: '[ OK   ]  Wayland compositor loaded', color: 'var(--green)' },
-    { text: '[ OK   ]  GNOME Shell 42.5 initialized', color: 'var(--green)' },
-    { text: '[ OK   ]  Loading window manager...', color: 'var(--green)' },
-    { text: '[ OK   ]  Desktop environment ready', color: 'var(--green)' },
-    { text: ' ', color: 'var(--muted)' },
-    { text: '[ INIT ]  Mounting filesystem...', color: 'var(--white)' },
-    { text: '[ OK   ]  /home/brady mounted', color: 'var(--green)' },
-    { text: '[ OK   ]  /home/brady/projects mounted', color: 'var(--green)' },
-    { text: '[ OK   ]  /home/brady/.hidden mounted', color: 'var(--green)' },
-    { text: '[ WARN ]  resume.pdf — coming soon', color: 'var(--amber)' },
-    { text: ' ', color: 'var(--muted)' },
-    { text: '[ INIT ]  Loading portfolio services...', color: 'var(--white)' },
-    { text: '[ OK   ]  files.service started', color: 'var(--green)' },
-    { text: '[ OK   ]  terminal.service started', color: 'var(--green)' },
-    { text: '[ OK   ]  projects.service started', color: 'var(--green)' },
-    { text: '[ OK   ]  settings.service started', color: 'var(--green)' },
-    { text: ' ', color: 'var(--muted)' },
-    { text: '[ DONE ]  GUI ready. Launching desktop...', color: 'var(--cyan)' },
-  ];
+  'source ubuntu.iso': () => {
+      if (window.innerWidth < 768) {
+      return `<span class="err">Ubuntu: not available on mobile</span> <span class="comment"># try on desktop for the full experience</span>`;
+    }
+    // inject overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:var(--bg);z-index:9998;
+      display:flex;flex-direction:column;padding:40px;
+      font-family:var(--mono);font-size:13px;line-height:1.8;overflow:hidden;
+    `;
 
-  // build line elements
-  lines.forEach(l => {
-    const el = document.createElement('div');
-    el.textContent = l.text;
-    el.style.cssText = `opacity:0;white-space:pre;color:${l.color};`;
-    overlay.appendChild(el);
-  });
+    const lines = [
+      { text: 'GENIK-OS v2.6.0  |  Launching Ubuntu GUI...', color: 'var(--green)' },
+      { text: ' ', color: 'var(--muted)' },
+      { text: '[ INIT ]  Starting display server...', color: 'var(--white)' },
+      { text: '[ OK   ]  Compositor loaded', color: 'var(--green)' },
+      { text: '[ OK   ]  GNOME Shell 42.5 initialized', color: 'var(--green)' },
+      { text: '[ OK   ]  Loading window manager...', color: 'var(--green)' },
+      { text: '[ OK   ]  Desktop environment ready', color: 'var(--green)' },
+      { text: ' ', color: 'var(--muted)' },
+      { text: '[ INIT ]  Mounting filesystem...', color: 'var(--white)' },
+      { text: '[ OK   ]  /home/brady mounted', color: 'var(--green)' },
+      { text: '[ OK   ]  /home/brady/projects mounted', color: 'var(--green)' },
+      { text: '[ OK   ]  /home/brady/.hidden mounted', color: 'var(--green)' },
+      { text: '[ WARN ]  resume.pdf - coming soon', color: 'var(--amber)' },
+      { text: ' ', color: 'var(--muted)' },
+      { text: '[ INIT ]  Loading portfolio services...', color: 'var(--white)' },
+      { text: '[ OK   ]  files.service started', color: 'var(--green)' },
+      { text: '[ OK   ]  terminal.service started', color: 'var(--green)' },
+      { text: '[ OK   ]  projects.service started', color: 'var(--green)' },
+      { text: '[ OK   ]  settings.service started', color: 'var(--green)' },
+      { text: ' ', color: 'var(--muted)' },
+      { text: '[ DONE ]  Ubuntu is ready. Launching desktop...', color: 'var(--cyan)' },
+    ];
 
-  // progress bar row
-  const barRow = document.createElement('div');
-  barRow.style.cssText = `display:flex;align-items:center;gap:12px;opacity:0;margin-top:4px;`;
-  barRow.innerHTML = `
-    <span style="color:var(--green);font-size:13px;">[ PROG ] </span>
-    <div style="height:6px;width:280px;background:var(--border);border-radius:1px;overflow:hidden;">
-      <div id="gui-boot-fill" style="height:100%;width:0%;background:var(--green);box-shadow:0 0 10px var(--green);transition:width 1.2s ease;"></div>
-    </div>
-    <span id="gui-boot-pct" style="color:var(--green);font-size:13px;">0%</span>
-  `;
-  overlay.appendChild(barRow);
-  document.body.appendChild(overlay);
+    // Build line elements
+    lines.forEach(l => {
+      const el = document.createElement('div');
+      el.textContent = l.text;
+      el.style.cssText = `opacity:0;white-space:pre;color:${l.color};`;
+      overlay.appendChild(el);
+    });
 
-  const els = overlay.querySelectorAll('div');
+    // Progress bar row
+    const barRow = document.createElement('div');
+    barRow.style.cssText = `display:flex;align-items:center;gap:12px;opacity:0;margin-top:4px;`;
+    barRow.innerHTML = `
+      <span style="color:var(--green);font-size:13px;">[ PROG ] </span>
+      <div style="height:6px;width:280px;background:var(--border);border-radius:1px;overflow:hidden;">
+        <div id="gui-boot-fill" style="height:100%;width:0%;background:var(--green);box-shadow:0 0 10px var(--green);transition:width 1.2s ease;"></div>
+      </div>
+      <span id="gui-boot-pct" style="color:var(--green);font-size:13px;">0%</span>
+    `;
+    overlay.appendChild(barRow);
+    document.body.appendChild(overlay);
 
-  // show lines one by one
-  const baseDelay = 80;
-  lines.forEach((_, i) => {
+    const els = overlay.querySelectorAll('div');
+
+    // Show lines one by one
+    const baseDelay = 80;
+    lines.forEach((_, i) => {
+      setTimeout(() => {
+        els[i].style.opacity = '1';
+      }, i * baseDelay);
+    });
+
+    // Show progress bar after lines
+    const barStart = lines.length * baseDelay + 100;
     setTimeout(() => {
-      els[i].style.opacity = '1';
-    }, i * baseDelay);
-  });
+      barRow.style.opacity = '1';
+      const fill = document.getElementById('gui-boot-fill');
+      const pct  = document.getElementById('gui-boot-pct');
+      let p = 0;
+      const iv = setInterval(() => {
+        p += Math.random() * 8 + 2;
+        if (p >= 100) { p = 100; clearInterval(iv); }
+        fill.style.width = p + '%';
+        pct.textContent  = Math.floor(p) + '%';
+      }, 60);
+    }, barStart);
 
-  // show progress bar after lines
-  const barStart = lines.length * baseDelay + 100;
-  setTimeout(() => {
-    barRow.style.opacity = '1';
-    const fill = document.getElementById('gui-boot-fill');
-    const pct  = document.getElementById('gui-boot-pct');
-    let p = 0;
-    const iv = setInterval(() => {
-      p += Math.random() * 8 + 2;
-      if (p >= 100) { p = 100; clearInterval(iv); }
-      fill.style.width = p + '%';
-      pct.textContent  = Math.floor(p) + '%';
-    }, 60);
-  }, barStart);
+    // Redirect after everything
+    const totalTime = barStart + 1600;
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.5s';
+      overlay.style.opacity = '0';
+      setTimeout(() => window.location.href = '/Desktop.html', 500);
+    }, totalTime);
 
-  // redirect after everything
-  const totalTime = barStart + 1600;
-  setTimeout(() => {
-    overlay.style.transition = 'opacity 0.5s';
-    overlay.style.opacity = '0';
-    setTimeout(() => window.location.href = '/Desktop.html', 500);
-  }, totalTime);
-
-  return `<span style="color:var(--green)">✓ launching GUI...</span>`;
-},
-
-  motd: () => `
-  <span class="warn"> Status   :</span> <span class="success">● LIVE</span> — Currently interning @ City of Winnipeg<br>
-  <span class="key">  Location :</span> Winnipeg, MB, Canada<br>
-  <span class="key">  Program  :</span> Network Systems Administrator — MITT (2023–2026)<br>
-  <span class="key">  Focus    :</span> Networking · Cybersecurity · Building cool stuff<br>
-  <span class="key">  Certs    :</span> Cloud Network Technician<br>`,
-
-  help: () => `<span class="comment">Available commands:</span></br>
-  <span class="key">projects</span>    — list all projects</br>
-  <span class="key">about</span>       — who is this guy</br>
-  <span class="key">skills</span>      — technical skills &amp; certs</br>
-  <span class="key">experience</span>  — work history</br>
-  <span class="key">contact</span>     — get in touch</br>
-  <span class="key">social</span>      — social links</br>
-  <span class="key">Portfolio</span>   — Access GUI portfolio</br>
-  <span class="key">clear</span>       — clear terminal</br>`,
-
-  whoami: () => `<span class="success">brady_genik</span> — NSA student @ MITT · Intern @ City of Winnipeg
-<span class="comment"># Builder. Network nerd. Extremely loud</span>`,
-
-  projects: () => `<span class="comment">// ~/projects — 6 entries</span></br>
-  <span class="key">[01]</span> <span class="success">Apollo</span>         <span class="val" style="color:var(--blue)">in_progress</span>  AI music tool</br>
-  <span class="key">[02]</span> <span class="success">Wrangler Dash</span>  <span class="success">done</span>         Modular error dashboard</br>
-  <span class="key">[03]</span> <span class="success">Athena</span>         <span class="warn">paused</span>       Brutally honest AI assistant</br>
-  <span class="key">[04]</span> <span class="success">Hermes</span>         <span class="val" style="color:var(--blue)">in_progress</span>  Note-taking app</br>
-  <span class="key">[05]</span> <span class="success">Hephaestus</span>     <span class="success">done</span>         Browser art studio</br>`,
-
-  about: () => `<span class="key">name</span>       = <span class="success">"Brady Genik"</span></br>
-<span class="key">location</span>   = <span class="warn">"Winnipeg, MB"</span></br>
-<span class="key">status</span>     = <span class="success">ACTIVE</span> — interning @ City of Winnipeg</br>
-<span class="key">program</span>    = <span class="val" style="color:var(--blue)">"NSA @ MITT (2023–2026)"</span></br>
-<span class="key">fun_fact</span>   = <span class="comment">"I Own A Tech Start Up called Dustyboot co"</span></br>`,
-
-  skills: () => `<span class="comment">// loaded kernel modules:</span></br>
-  <span class="key">networking</span>  CCNA · Cisco IOS · VLANs · Routing · Subnetting</br>
-  <span class="key">security</span>    CompTIA Security+ · Azure · Zero Trust · IAM</br>
-  <span class="key">sysadmin</span>    Linux · Windows Server · Active Directory · PowerShell</br>
-  <span class="key">cloud</span>       Azure · Cloud Network Technician</br>
-  <span class="key">dev</span>         Python · Flask · HTML · CSS · JavaScript</br>
-  <span class="key">hardware</span>    APs · Switches · Routers · enterprise infrastructure</br>`,
-
-  experience: () => `<span class="comment">// work history — chronological desc</span></br>
-  <span class="key">2026</span>  City of Winnipeg  — <span class="success">Tech &amp; Innovation Intern</span></br>
-  <span class="key">2023</span>  MITT              — <span class="val" style="color:var(--blue)">NSA Student (ongoing)</span></br>
-  <span class="key">2022</span>  Gondola Pizza     — <span class="warn">Cook · Driver · Cashier · "Tech Support"</span></br>`,
-
-  contact: () => `<span class="comment">// reach me at:</span></br>
-  <span class="key">github</span>    → <a class="link" href="https://github.com/brady9999" target="_blank">github.com/brady9999</a></br>
-  <span class="key">linkedin</span>  → <a class="link" href="https://linkedin.com/in/bradygenik" target="_blank">linkedin.com/in/bradygenik</a></br>
-  <span class="key">instagram</span> → <a class="link" href="https://instagram.com/bradygenik.ps1" target="_blank">instagram.com/brady_genik2</a></br>
-  <span class="key">form</span>      → <a class="link" href="/Pages/contact.html">bradygenik.com/contact</a></br>
-  <span class="success">✓ always open to opportunities, collabs, or just talking tech</span>`,
-
-  social: () => `<span class="key">github</span>    → <a class="link" href="https://github.com/brady9999" target="_blank">github.com/brady9999</a></br>
-<span class="key">linkedin</span>  → <a class="link" href="https://linkedin.com/in/bradygenik" target="_blank">linkedin.com/in/bradygenik</a></br>
-<span class="key">instagram</span> → <a class="link" href="https://instagram.com/brady_genik2" target="_blank">instagram.com/brady_genik2</a></br>`,
-
-  scroll: () => {
-    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-    return `<span class="success">✓ scrolling to projects...</span>`;
+    return `<span style="color:var(--green)">✓ launching Ubuntu...</span>`;
   },
 
+  'help': () => `
+  <span class="key">To open files use 'sudo nano ...'</span><br>
+  <span class="key">In order to activate the ubuntu desktop image 'source ubuntu.iso'</span><br>
+  <span class="key"> Tab Key will autocomplete commands</span>`,
+
+  'ls': () => `
+  <span class="file">projects.conf</span>
+  <span class="file">about_me.txt</span>
+  <span class="file">ubuntu.iso</span>`,
+
+  'whoami': () => `<span class="success">brady_genik</span> - NSA student @ MITT · Intern @ City of Winnipeg
+  <span class="comment"># Builder. Network nerd. Extremely loud</span>`,
+
+  "sudo nano projects.conf": () => {
+    const overlay = document.createElement('div');
+    overlay.id = 'nano-overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:var(--bg);z-index:9999;
+      display:flex;flex-direction:column;font-family:var(--mono);font-size:13px;
+      color:var(--white);
+    `;
+
+    const fileContent = [
+      `# /home/brady/projects.conf`,
+      `# last modified: 2026`,
+      ``,
+      `[apollo]`,
+      `status     = in_progress`,
+      `type       = AI music tool`,
+      `stack      = Python, Flask, AI/ML`,
+      `notes      = building something cool with music generation`,
+      ``,
+      `[wrangler-dash]`,
+      `status     = done`,
+      `type       = Modular error dashboard`,
+      `stack      = JavaScript, HTML, CSS`,
+      `notes      = clean error tracking, modular by design`,
+      ``,
+      `[athena]`,
+      `status     = paused`,
+      `type       = Brutally honest AI assistant`,
+      `stack      = Python, LLM APIs`,
+      `notes      = on hold, will return`,
+      ``,
+      `[hermes]`,
+      `status     = in_progress`,
+      `type       = Note-taking app`,
+      `stack      = JavaScript, HTML, CSS`,
+      `notes      = fast, minimal, no nonsense`,
+      ``,
+      `[hephaestus]`,
+      `status     = done`,
+      `type       = Browser art studio`,
+      `stack      = JavaScript, Canvas API`,
+      `notes      = draw stuff in your browser, its pretty fun`,
+      ``,
+      `# EOF`,
+    ];
+
+    let scrollOffset = 0;
+    const lineHeight = 23;
+    const topBarHeight = 28;
+    const bottomBarHeight = 28;
+    const visibleLines = Math.floor((window.innerHeight - topBarHeight - bottomBarHeight) / lineHeight);
+
+    // top bar
+    const topBar = document.createElement('div');
+    topBar.style.cssText = `
+      background:#fff;color:#000;padding:2px 8px;
+      display:flex;justify-content:space-between;flex-shrink:0;
+    `;
+    topBar.innerHTML = `<span></span><span>GNU nano 6.0  /home/brady/projects.conf</span><span></span>`;
+
+    // content area
+    const contentArea = document.createElement('div');
+    contentArea.style.cssText = `
+      flex:1;overflow:hidden;padding:4px 8px;line-height:1.8;white-space:pre;
+    `;
+
+    // bottom bar
+    const bottomBar = document.createElement('div');
+    bottomBar.style.cssText = `
+      background:#000;color:#FFF;padding:2px 8px;
+      display:flex;gap:24px;flex-shrink:0;flex-wrap:wrap;
+    `;
+    bottomBar.innerHTML = `
+      <span><b>^X</b> Exit</span>
+    `;
+
+    function renderContent() {
+      const slice = fileContent.slice(scrollOffset, scrollOffset + visibleLines);
+      contentArea.innerHTML = slice.map((line, i) => {
+        const lineNum = scrollOffset + i + 1;
+        const numSpan = `<span style="color:var(--muted);user-select:none;">${String(lineNum).padStart(3, ' ')}  </span>`;
+
+        let colored = line
+          .replace(/^(#.*)$/, `<span style="color:var(--muted)">$1</span>`)
+          .replace(/^(\[.+\])$/, `<span style="color:var(--green)">$1</span>`)
+          .replace(/^(\w+)(\s*=\s*)(.+)$/, (_, k, eq, v) => {
+            let valColor = 'var(--white)';
+            if (v.includes('in_progress')) valColor = 'var(--blue)';
+            if (v === 'done') valColor = 'var(--green)';
+            if (v === 'paused') valColor = 'var(--amber)';
+            return `<span style="color:var(--cyan)">${k}</span>${eq}<span style="color:${valColor}">${v}</span>`;
+          });
+
+        return `<div>${numSpan}${colored}</div>`;
+      }).join('');
+    }
+
+    overlay.appendChild(topBar);
+    overlay.appendChild(contentArea);
+    overlay.appendChild(bottomBar);
+    document.body.appendChild(overlay);
+    renderContent();
+
+    // key handler
+    function nanoKeyHandler(e) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (scrollOffset < fileContent.length - visibleLines) scrollOffset++;
+        renderContent();
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (scrollOffset > 0) scrollOffset--;
+        renderContent();
+      }
+      if (e.key === 'PageDown') {
+        e.preventDefault();
+        scrollOffset = Math.min(scrollOffset + visibleLines, fileContent.length - visibleLines);
+        renderContent();
+      }
+      if (e.key === 'PageUp') {
+        e.preventDefault();
+        scrollOffset = Math.max(scrollOffset - visibleLines, 0);
+        renderContent();
+      }
+      // Ctrl+X to exit
+      if (e.key === 'x' && e.ctrlKey) {
+        e.preventDefault();
+        document.removeEventListener('keydown', nanoKeyHandler);
+        overlay.remove();
+        document.getElementById('term-input').focus();
+      }
+    }
+
+    document.addEventListener('keydown', nanoKeyHandler);
+
+    window.addEventListener('resize', () => {
+      visibleLines = Math.floor((window.innerHeight - topBarHeight - bottomBarHeight) / lineHeight);
+      renderContent();
+    });
+
+    return `<span style="color:var(--green)">✓ opening projects.conf...</span>`;
+  },
+
+  "sudo nano about_me.txt": () => {
+    const overlay = document.createElement('div');
+    overlay.id = 'nano-overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:var(--bg);z-index:9999;
+      display:flex;flex-direction:column;font-family:var(--mono);font-size:13px;
+      color:var(--white);
+    `;
+
+    const fileContent = [
+      `# /home/brady/about_me.txt`,
+      `# last modified: 2026-04-07`,
+      ``,
+       ` ABOUT ME `,
+       ` `,
+       ` fun_fact   =  I Own A Few Tech Start Up's called Dustyboot co and Argus Ops`,
+       ` location   =  Winnipeg, MB, Canada`,
+       ` education    =  Network Systems Administrator @ MITT (2023–2026)`,
+       ``,
+       ` SKILLS`,
+       ``,
+       ` networking =    VLANs · DNS/DHCP · VPN · TCP/IP · IPAM · SNMP`,
+       ` security   =    IT Security · DNS Security & Email Authentication (SPF, DKIM, DMARC) · DNS Record Management (A, AAAA, CNAME, MX, TXT)`,
+       ` operating systems   =  Windows OS · Linux OS · Raspberry Pi OS · iOS`,
+       ` cloud      =   Azure · AWS`,
+       ` virtualization =  VMware workstation · Proxmox · Hyper-V · ESXi`,
+       ` dev        =    JavaScript · Python · HTML · Node.js · PowerShell · Bash · SQL · Flask · REST APIs`,
+       ` hardware   =   APs · Switches · Routers · UPS`,
+       ` system management =  NetBox · Cisco · Zabbix · Git · PostgreSQL · Active Directory · Group Policy · Azure AD · Microsoft 365 · Tailscale`,
+       ``,
+       ` EXPERIENCE`,
+       ``,
+       ` 2026  City of Winnipeg  - Tech & Innovation Intern`,
+       ` 2022  Gondola Pizza     - Cook · Driver · Cashier · "Tech Support"`,
+       ``,
+       ` SOCIALS`,
+       ``,
+       ` github    → <a class="link" href="https://github.com/brady9999" target="_blank">github.com/brady9999</a>`,
+       ` linkedin  → <a class="link" href="https://linkedin.com/in/bradygenik" target="_blank">linkedin.com/in/bradygenik</a>`,
+       ` instagram → <a class="link" href="https://instagram.com/bradygenik.ps1" target="_blank">instagram.com/brady_genik2</a>`,
+      `# EOF`,
+    ];
+
+    let scrollOffset = 0;
+    const lineHeight = 23;
+    const topBarHeight = 28;
+    const bottomBarHeight = 28;
+    const visibleLines = Math.floor((window.innerHeight - topBarHeight - bottomBarHeight) / lineHeight);
+
+    // top bar
+    const topBar = document.createElement('div');
+    topBar.style.cssText = `
+      background:#fff;color:#000;padding:2px 8px;
+      display:flex;justify-content:space-between;flex-shrink:0;
+    `;
+    topBar.innerHTML = `<span></span><span>GNU nano 6.0  /home/brady/about_me.txt</span><span></span>`;
+
+    // content area
+    const contentArea = document.createElement('div');
+    contentArea.style.cssText = `
+      flex:1;overflow:hidden;padding:4px 8px;line-height:1.8;white-space:pre;
+    `;
+
+    // bottom bar
+    const bottomBar = document.createElement('div');
+    bottomBar.style.cssText = `
+      background:#000;color:#FFF;padding:2px 8px;
+      display:flex;gap:24px;flex-shrink:0;flex-wrap:wrap;
+    `;
+    bottomBar.innerHTML = `
+      <span><b>^X</b> Exit</span>
+    `;
+
+    function renderContent() {
+      const slice = fileContent.slice(scrollOffset, scrollOffset + visibleLines);
+      contentArea.innerHTML = slice.map((line, i) => {
+        const lineNum = scrollOffset + i + 1;
+        const numSpan = `<span style="color:var(--muted);user-select:none;">${String(lineNum).padStart(3, ' ')}  </span>`;
+
+        let colored = line
+          .replace(/^(#.*)$/, `<span style="color:var(--muted)">$1</span>`)
+          .replace(/^(\[.+\])$/, `<span style="color:var(--green)">$1</span>`)
+          .replace(/^(\w+)(\s*=\s*)(.+)$/, (_, k, eq, v) => {
+            let valColor = 'var(--white)';
+            if (v.includes('in_progress')) valColor = 'var(--blue)';
+            if (v === 'done') valColor = 'var(--green)';
+            if (v === 'paused') valColor = 'var(--amber)';
+            return `<span style="color:var(--cyan)">${k}</span>${eq}<span style="color:${valColor}">${v}</span>`;
+          });
+
+        return `<div>${numSpan}${colored}</div>`;
+      }).join('');
+    }
+
+    overlay.appendChild(topBar);
+    overlay.appendChild(contentArea);
+    overlay.appendChild(bottomBar);
+    document.body.appendChild(overlay);
+    renderContent();
+
+    // key handler
+    function nanoKeyHandler(e) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (scrollOffset < fileContent.length - visibleLines) scrollOffset++;
+        renderContent();
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (scrollOffset > 0) scrollOffset--;
+        renderContent();
+      }
+      if (e.key === 'PageDown') {
+        e.preventDefault();
+        scrollOffset = Math.min(scrollOffset + visibleLines, fileContent.length - visibleLines);
+        renderContent();
+      }
+      if (e.key === 'PageUp') {
+        e.preventDefault();
+        scrollOffset = Math.max(scrollOffset - visibleLines, 0);
+        renderContent();
+      }
+      // Ctrl+X to exit
+      if (e.key === 'x' && e.ctrlKey) {
+        e.preventDefault();
+        document.removeEventListener('keydown', nanoKeyHandler);
+        overlay.remove();
+        document.getElementById('term-input').focus();
+      }
+    }
+
+    document.addEventListener('keydown', nanoKeyHandler);
+
+    window.addEventListener('resize', () => {
+      visibleLines = Math.floor((window.innerHeight - topBarHeight - bottomBarHeight) / lineHeight);
+      renderContent();
+    });
+
+    return `<span style="color:var(--green)">✓ opening about_me.txt...</span>`;
+  },
+
+  //clear cmd just wipes the history for fun
   clear: () => {
     document.getElementById('history').innerHTML = '';
     return null;
   },
 
-  ls: () => `<span class="key">drwxr-xr-x</span>  projects/</br>
-<span class="key">drwxr-xr-x</span>  about/</br>
-<span class="key">drwxr-xr-x</span>  experience/</br>
-<span class="key">-rw-r--r--</span>  brady_genik.conf</br>`,
+  sudo: (args) => `<span class="err">WHO YOU TRYNA MESS WITH HUH?????</span><br>
+  <span class="err">WHAT DO YOU NEED WITH MY ROOT DOMAIN????</span><br>
+  <span class="err">DONT TEST ME?!?!?!?!</span><br>
+  <span class="err">This incident will be reported.</span><br>
+  <span class="comment"># (jk, this is just a portfolio site)</span><br>
+  <span class="comment"># but seriously, nice try)</span>`,
 
-  pwd: () => `<span class="success">/home/brady/portfolio</span>`,
-
-  date: () => `<span class="success">${new Date().toString()}</span>`,
-
-  sudo: (args) => `<span class="err">[sudo] password for brady: </span>
-<span class="err">brady is not in the sudoers file. This incident will be reported.</span>
-<span class="comment"># (jk, this is just a portfolio site)</span>`,
-
-  uname: () => `<span class="success">GENIK-OS 2.6.0 brady-portfolio #1 SMP JetBrains-Mono</span>`,
+  lsb_release: () => `<span class="success">GENIK-OS v2.7.3</span>`,
 
   placeholder: () => `<span class="comment">// this is literally a placeholder command, come on</span>`,
 };
@@ -729,22 +940,33 @@ input.addEventListener('keydown', e => {
 
     cmdHistory.unshift(raw);
     const parts = raw.split(' ');
-    const cmd   = parts[0].toLowerCase();
-    const args  = parts.slice(1);
+    const lparts = raw.toLowerCase().split(' ');
+
+    // Longest-match: try all word counts from most to least
+    let fn = null;
+    let args = [];
+    for (let i = lparts.length; i >= 1; i--) {
+      const key = lparts.slice(0, i).join(' ');
+      if (COMMANDS[key]) {
+        fn = COMMANDS[key];
+        args = parts.slice(i);
+        break;
+      }
+    }
 
     const block = document.createElement('div');
     block.className = 'hist-block';
 
     const cmdLine = document.createElement('div');
     cmdLine.className = 'hist-cmd prompt-line';
-    cmdLine.innerHTML = `<span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:~</span><span class="dollar">$ </span></span><span class="output">${escHtml(raw)}</span>`;
+    cmdLine.innerHTML = `<span class="ps1"><span class="u">brady</span><span class="at">@</span><span class="host">genik</span><span class="path">:/home/brady</span><span class="dollar">$ </span></span><span class="output">${escHtml(raw)}</span>`;
     block.appendChild(cmdLine);
 
     let out = null;
-    if (COMMANDS[cmd]) {
-      out = COMMANDS[cmd](args);
+    if (fn) {
+      out = fn(args);
     } else {
-      out = `<span class="err">command not found: ${escHtml(cmd)}</span>  <span class="comment"># try 'help'</span>`;
+      out = `<span class="err">command not found: ${escHtml(parts[0])}</span>  <span class="comment"># try 'sh help'</span>`;
     }
 
     if (out !== null) {
@@ -777,6 +999,7 @@ input.addEventListener('keydown', e => {
     const match = Object.keys(COMMANDS).find(k => k.startsWith(partial));
     if (match) input.value = match;
   }
+
 });
 
 function escHtml(s) {
@@ -786,9 +1009,7 @@ function escHtml(s) {
 // Focus terminal on click anywhere in terminal
 document.querySelector('.terminal-hero').addEventListener('click', () => input.focus());
 
-/* ═══════════════════════════════════════
-   SCROLL REVEALS
-═══════════════════════════════════════ */
+/* Scroll reveals */
 function initReveal() {
   const els = document.querySelectorAll('.reveal');
   const ro = new IntersectionObserver((entries) => {
